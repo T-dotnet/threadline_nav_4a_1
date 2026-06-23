@@ -1,0 +1,117 @@
+@import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+:root {
+  --font-inter: "Inter", sans-serif;
+  --font-serif: "Fraunces", serif;
+  
+  --color-thread-cream: #EEE9D9;
+  --color-thread-gray: #6B7280;
+  --color-thread-dark-slate: #1F2937;
+  --color-thread-light-gray: #D1D5DB;
+  --color-thread-placeholder: #9CA3AF;
+  
+  /* Hero Styles - Default White */
+  --hero-bg: #FFFFFF;
+  --hero-text: #0B4636;
+  --hero-accent: #108560;
+  --hero-secondary-bg: #E6F4ED;
+  --hero-secondary-text: #0B4636;
+  --hero-secondary-track: rgba(0, 0, 0, 0.05);
+  --hero-secondary-icon-bg: rgba(11, 70, 54, 0.1);
+  --hero-secondary-icon-text: #0B4636;
+  --hero-border: rgba(0, 0, 0, 0.05);
+  --hero-ring-opacity: 0.1;
+  --hero-meter-light: 0; /* 0 for false, 1 for true */
+  --hero-secondary-meter-light: 0;
+}
+
+:root[data-hero-style='green'] {
+  --hero-bg: var(--color-thread-mid-green);
+  --hero-text: #FFFFFF;
+  --hero-accent: #E6F4ED;
+  --hero-secondary-bg: #E6F4ED;
+  --hero-secondary-text: #0B4636;
+  --hero-border: transparent;
+  --hero-ring-opacity: 0.15;
+  --hero-meter-light: 1;
+  --hero-secondary-meter-light: 0;
+}
+
+:root[data-hero-secondary='dark'] {
+  --hero-secondary-bg: var(--color-thread-mid-green);
+  --hero-secondary-text: #FFFFFF;
+  --hero-secondary-track: rgba(255, 255, 255, 0.15);
+  --hero-secondary-icon-bg: rgba(255, 255, 255, 0.2);
+  --hero-secondary-icon-text: #FFFFFF;
+  --hero-secondary-meter-light: 1;
+}
+
+:root[data-hero-secondary='light'] {
+  --hero-secondary-bg: #E6F4ED;
+  --hero-secondary-text: #0B4636;
+  --hero-secondary-track: rgba(0, 0, 0, 0.05);
+  --hero-secondary-icon-bg: rgba(11, 70, 54, 0.1);
+  --hero-secondary-icon-text: #0B4636;
+  --hero-secondary-meter-light: 0;
+}
+
+:root[data-font='classic-serif'] {
+  --font-serif: "Frank Ruhl Libre", serif;
+}
+
+:root, :root[data-theme='energetic'] {
+  --color-thread-mid-green: #108560;
+  --color-thread-dark-forest: var(--color-thread-mid-green);
+  --color-thread-deep-forest: var(--color-thread-mid-green);
+  --color-thread-light-green: #E6F4ED;
+  --color-thread-off-white: #F5F7F6;
+  --color-thread-muted-green: #5C8279;
+  --color-thread-darkest: #0A1F1B;
+  --color-thread-heading: #0B4636;
+}
+
+:root[data-theme='classic'] {
+  --color-thread-mid-green: #2A5B4A;
+  --color-thread-dark-forest: var(--color-thread-mid-green);
+  --color-thread-deep-forest: var(--color-thread-mid-green);
+  --color-thread-light-green: #E3EBE7;
+  --color-thread-off-white: #F5F5F5;
+  --color-thread-muted-green: #6F827D;
+  --color-thread-darkest: #0B1613;
+  --color-thread-heading: #16362D;
+}
+
+body {
+  background-color: var(--color-thread-off-white);
+}
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-serif), serif;
+  
+  --color-thread-dark-forest: var(--color-thread-dark-forest);
+  --color-thread-deep-forest: var(--color-thread-deep-forest);
+  --color-thread-mid-green: var(--color-thread-mid-green);
+  --color-thread-light-green: var(--color-thread-light-green);
+  --color-thread-off-white: var(--color-thread-off-white);
+  --color-thread-cream: var(--color-thread-cream);
+  --color-thread-gray: var(--color-thread-gray);
+  --color-thread-muted-green: var(--color-thread-muted-green);
+  --color-thread-dark-slate: var(--color-thread-dark-slate);
+  --color-thread-darkest: var(--color-thread-darkest);
+  --color-thread-light-gray: var(--color-thread-light-gray);
+  --color-thread-placeholder: var(--color-thread-placeholder);
+  --color-thread-heading: var(--color-thread-heading);
+
+  --shadow-premium: 0 22px 44px -28px rgba(22, 36, 60, 0.5);
+  --shadow-premium-light: 0 22px 44px -28px rgba(22, 36, 60, 0.1);
+  --shadow-dropdown: 0 12px 24px -10px rgba(22, 36, 60, 0.15);
+  --shadow-modal: 0 24px 48px -12px rgba(22, 36, 60, 0.15);
+}
+
+@utility bg-watercolor {
+  background-image: linear-gradient(rgba(244, 243, 238, 0.58), rgba(244, 243, 238, 0.58)), url("./assets/images/IMG_2912.jpeg");
+  background-size: cover;
+  background-position: center;
+}
