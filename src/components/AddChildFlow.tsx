@@ -11,6 +11,7 @@ import { HeroQuoteCard } from './ui/HeroQuoteCard';
 import { TimelineStep } from './ui/TimelineStep';
 import { PageIcon } from './ui/PageIcon';
 import { getCompletedQuestionnaireSections } from '../questionnaire';
+import watercolorBg from '../assets/images/watercolor_bg_1782427011739.jpg';
 
 interface Question {
   id: string;
@@ -230,6 +231,7 @@ export default function AddChildFlow({ onComplete, onCancel }: AddChildFlowProps
     }
     return null;
   });
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [bedtimeStruggle, setBedtimeStruggle] = useState<string>('Sometimes');
   const [activeQuestionIndex, setActiveQuestionIndex] = useState<number>(0);
   const [isReviewing, setIsReviewing] = useState<boolean>(false);
@@ -708,7 +710,7 @@ export default function AddChildFlow({ onComplete, onCancel }: AddChildFlowProps
           {typeof step === 'number' && (
             <>
               {/* Left Column: Interactive Sidebar Progress */}
-              {!qSection && (
+              {true && (
                 <aside className="w-full md:w-72 bg-transparent p-8 sm:p-10 border-b md:border-b-0 md:border-r border-black/5 flex-shrink-0 flex flex-col">
                   <div className="font-sans font-semibold text-lg text-[var(--color-thread-heading)] tracking-tight mb-8">
                     {formData.firstName || 'Your child'}'s setup
@@ -1002,15 +1004,15 @@ export default function AddChildFlow({ onComplete, onCancel }: AddChildFlowProps
                   {/* Step 4 */}
                   {step === 4 && (
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
-                      {!qSection && (
+                      {true && (
                         <div>
                           <span className="text-[0.7rem] font-bold tracking-[0.1em] uppercase text-[var(--color-thread-mid-green)] mb-4 block">Step 4 of 5 · Questionnaire</span>
                           <h1 className="font-sans font-medium text-3xl text-[var(--color-thread-heading)] mb-2">Everyday life & environment</h1>
-                          <p className="text-slate-500 text-[1.05rem] leading-relaxed max-w-[42ch]">A comprehensive view of {formData.firstName || 'Maya'}’s world — from routines to school life. A clinician reviews every answer before your session.</p>
+                          <p className="text-slate-500 text-[1.05rem] leading-relaxed max-w-[42ch]">A comprehensive view of {formData.firstName || 'Maya'}'s world — from routines to school life. A clinician reviews every answer before your session.</p>
                         </div>
                       )}
 
-                      {!qSection ? (
+                      {true ? (
                         <div className="space-y-3">
                           {(() => {
                             const completedSectionsCount = ['Home & family', 'Daily routines', 'At school', 'Development & history'].filter(
@@ -1057,50 +1059,89 @@ export default function AddChildFlow({ onComplete, onCancel }: AddChildFlowProps
                             const status = getSectionStatus(sec);
                             const isDone = status === 'Completed';
                             const qCount = (QUESTIONS[sec] || []).length;
+                            const prevSec = i > 0 ? ['Home & family', 'Daily routines', 'At school', 'Development & history'][i - 1] : null;
+                            const isLocked = i > 0 && getSectionStatus(prevSec!) !== 'Completed';
+                            const isInProgress = !isDone && !isLocked && status !== 'Not started';
                             return (
-                              <button 
+                              <button
                                 key={sec}
                                 onClick={() => {
+                                  if (isLocked) return;
                                   setQSection(sec);
                                   setActiveQuestionIndex(0);
                                   setIsReviewing(false);
+                                  setIsModalOpen(true);
                                 }}
-                                className="w-full bg-white p-6 rounded-2xl border border-black/5 hover:border-[var(--color-thread-mid-green)] shadow-sm hover:shadow-premium-hover flex items-center gap-5 text-left hover:bg-slate-50/50 transition-all group"
+                                disabled={isLocked}
+                                className={cn(
+                                  "w-full bg-white p-6 rounded-2xl border shadow-sm flex items-center gap-5 text-left transition-all group",
+                                  isLocked
+                                    ? "border-black/5 opacity-50 cursor-not-allowed"
+                                    : "border-black/5 hover:border-[var(--color-thread-mid-green)] hover:shadow-premium-hover hover:bg-slate-50/50 cursor-pointer"
+                                )}
                               >
                                 <div className={cn(
                                   "w-10 h-10 rounded-full border-2 flex items-center justify-center text-xs font-bold transition-all shrink-0",
                                   isDone
                                     ? "bg-[var(--color-thread-mid-green)] border-[var(--color-thread-mid-green)] text-white"
+                                    : isLocked
+                                    ? "border-slate-200 text-slate-300 bg-slate-50"
                                     : "border-slate-200 text-slate-400 bg-[var(--color-thread-off-white)] group-hover:bg-white group-hover:border-[var(--color-thread-mid-green)] group-hover:text-[var(--color-thread-mid-green)]"
                                 )}>
-                                  {isDone ? <Check className="w-4 h-4" /> : i + 1}
+                                  {isDone ? <Check className="w-4 h-4" /> : isLocked ? <span className="text-slate-300">🔒</span> : i + 1}
                                 </div>
                                   <div className="flex-1">
-                                    <div className="font-sans font-medium text-lg text-slate-900 leading-tight">{sec}</div>
+                                    <div className={cn("font-sans font-medium text-lg leading-tight", isLocked ? "text-slate-400" : "text-slate-900")}>{sec}</div>
                                     <div className="text-xs text-slate-500 mt-1.5 leading-relaxed">
-                                      Tell us about {formData.firstName || 'Maya'}’s everyday life · {qCount} questions
+                                      {isLocked
+                                        ? `Complete "${['Home & family', 'Daily routines', 'At school', 'Development & history'][i - 1]}" to unlock`
+                                        : `Tell us about ${formData.firstName || 'Maya'}'s everyday life · ${qCount} questions`}
                                     </div>
-                                    <div className={cn(
-                                      "text-[10px] font-bold mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full uppercase tracking-wider",
-                                      isDone ? "bg-[var(--color-thread-light-green)] text-[var(--color-thread-mid-green)]" : status === 'Not started' ? "bg-slate-100 text-slate-400" : "bg-amber-50 text-amber-600"
-                                    )}>
-                                      {isDone && <Check className="w-3 h-3" />}
-                                      {status}
-                                    </div>
+                                    {!isLocked && (
+                                      <div className={cn(
+                                        "text-[10px] font-bold mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full uppercase tracking-wider",
+                                        isDone ? "bg-[var(--color-thread-light-green)] text-[var(--color-thread-mid-green)]" : status === 'Not started' ? "bg-slate-100 text-slate-400" : "bg-amber-50 text-amber-600"
+                                      )}>
+                                        {isDone && <Check className="w-3 h-3" />}
+                                        {isDone ? 'Completed' : isInProgress ? status : 'Start section →'}
+                                      </div>
+                                    )}
                                   </div>
-                                <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-slate-500 transition-colors" />
+                                {!isLocked && <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-slate-500 transition-colors" />}
                               </button>
                             );
                           })}
                         </div>
-                      ) : (
+                      )}
+                    </motion.div>
+                  )}
+
+                  {/* QUESTIONNAIRE MODAL */}
+                  <AnimatePresence>
+                  {isModalOpen && qSection && (
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 md:p-10"
+                      style={{ backgroundImage: `url(${watercolorBg})`, backgroundSize: 'cover', backgroundPosition: 'center' }}
+                    >
+                      <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px]" />
+                      <motion.div
+                        initial={{ opacity: 0, y: 20, scale: 0.97 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.97 }}
+                        transition={{ duration: 0.3 }}
+                        className="relative z-10 w-full max-w-2xl bg-white rounded-3xl shadow-[0_32px_80px_-12px_rgba(0,0,0,0.18)] border border-black/5 flex flex-col max-h-[90vh] overflow-hidden"
+                      >
                         <div className="flex flex-col h-full justify-between min-h-[480px]">
                           {/* Header / Nav-back */}
-                          <div className="flex items-center justify-between pb-5 border-b border-black/5">
-                            <button 
+                          <div className="flex items-center justify-between p-6 pb-5 border-b border-black/5">
+                            <button
                               onClick={() => {
                                 saveCurrentChildIntake();
                                 setQSection(null);
+                                setIsModalOpen(false);
                               }}
                               className="text-xs font-bold uppercase tracking-wider text-[var(--color-thread-mid-green)] hover:text-[var(--color-thread-heading)] flex items-center gap-1.5 cursor-pointer transition-colors"
                             >
@@ -1112,7 +1153,7 @@ export default function AddChildFlow({ onComplete, onCancel }: AddChildFlowProps
                           </div>
 
                           {/* Main Body */}
-                          <div className="flex-1 py-10 flex flex-col justify-center">
+                          <div className="flex-1 py-8 px-6 sm:px-10 flex flex-col justify-center overflow-y-auto">
                             <AnimatePresence mode="wait">
                               {!isReviewing ? (
                                 <motion.div
@@ -1308,6 +1349,7 @@ export default function AddChildFlow({ onComplete, onCancel }: AddChildFlowProps
                                         saveCurrentChildIntake();
                                         setQSection(null);
                                         setIsReviewing(false);
+                                        setIsModalOpen(false);
                                       }}
                                       className="bg-[var(--color-thread-mid-green)] text-white px-6 py-2.5 rounded-xl font-semibold shadow-none hover:bg-[var(--color-thread-heading)] transition-all flex items-center gap-2 cursor-pointer text-sm"
                                     >
@@ -1329,7 +1371,7 @@ export default function AddChildFlow({ onComplete, onCancel }: AddChildFlowProps
                           </div>
 
                           {/* Footer Navigation */}
-                          <div className="pt-6 border-t border-black/5 flex items-center justify-between">
+                          <div className="pt-5 pb-6 px-6 sm:px-10 border-t border-black/5 flex items-center justify-between">
                             {/* Progress bar / index indicator */}
                             <div className="flex items-center gap-4">
                               <span className="text-xs font-mono font-bold text-slate-400">
@@ -1376,9 +1418,10 @@ export default function AddChildFlow({ onComplete, onCancel }: AddChildFlowProps
                             </div>
                           </div>
                         </div>
-                      )}
+                      </motion.div>
                     </motion.div>
                   )}
+                  </AnimatePresence>
 
                   {/* Step 5 */}
                   {step === 5 && (
@@ -1467,7 +1510,7 @@ export default function AddChildFlow({ onComplete, onCancel }: AddChildFlowProps
                 </div>
 
                 {/* Unified In-Card navigation footer inside the card container */}
-                {!(step === 4 && qSection !== null) && (
+                {true && (
                   <div className="flex items-center justify-between pt-8 border-t border-black/5 mt-12 w-full">
                     <button 
                       onClick={handleBack} 

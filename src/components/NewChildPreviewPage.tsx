@@ -1,8 +1,9 @@
 import { motion } from "motion/react";
-import { ArrowRight, LineChart, ListTodo, Lock, Milestone, Users } from "lucide-react";
+import { ArrowRight, CheckCircle2, LineChart, ListTodo, Lock, Milestone, Users } from "lucide-react";
 import { ActionLink } from "./ui/ActionLink";
 import { Page } from "../types";
 import { useCurrentChild } from "../context/ChildContext";
+import { QUESTIONNAIRE_SECTIONS, getCompletedQuestionnaireSections } from "../questionnaire";
 import { PageContainer } from "./ui/PageContainer";
 import { PageHeader } from "./ui/PageHeader";
 import { FadeInScroll } from "./ui/FadeInScroll";
@@ -25,29 +26,39 @@ const previewSections = [
     category: "Clinical picture",
     description: "A clear synthesis of strengths, support needs, evidence sources, and what is still uncertain.",
     icon: Users,
+    questionnaireSection: QUESTIONNAIRE_SECTIONS[0],
+    unlockedHint: "Home and family context added.",
   },
   {
     title: "Priorities",
     category: "What matters first",
     description: "A ranked view of where to focus, why it matters, and what can safely wait.",
     icon: ListTodo,
+    questionnaireSection: QUESTIONNAIRE_SECTIONS[1],
+    unlockedHint: "Daily routine context added.",
   },
   {
     title: "Roadmap",
     category: "Next steps",
     description: "Practical actions for home, school, and appointments once the first formulation is ready.",
     icon: Milestone,
+    questionnaireSection: QUESTIONNAIRE_SECTIONS[2],
+    unlockedHint: "School context added.",
   },
   {
     title: "Reviews",
     category: "Progress over time",
     description: "A review rhythm that tracks change without freezing the picture at the first report.",
     icon: LineChart,
+    questionnaireSection: QUESTIONNAIRE_SECTIONS[3],
+    unlockedHint: "Development history added.",
   },
 ];
 
 export default function NewChildPreviewPage({ onPageChange }: NewChildPreviewPageProps) {
   const { currentChild } = useCurrentChild();
+  const answers = currentChild.intake?.questionnaireAnswers || {};
+  const completedSections = getCompletedQuestionnaireSections(answers);
 
   return (
     <motion.div
@@ -95,12 +106,21 @@ export default function NewChildPreviewPage({ onPageChange }: NewChildPreviewPag
             {previewSections.map((section, index) => {
               const Icon = section.icon;
               const corners = ["rounded-tr-[32px]", "rounded-tl-[32px]", "rounded-br-[32px]", "rounded-bl-[32px]"];
+              const hasContext = completedSections.includes(section.questionnaireSection);
               return (
                 <div
                   key={section.title}
-                  className={`bg-white border border-black/5 shadow-premium-light p-7.5 ${corners[index]}`}
+                  className={`bg-white border p-7.5 ${corners[index]} transition-all duration-300 ${
+                    hasContext
+                      ? "border-[var(--color-thread-mid-green)]/20 shadow-[0_0_0_1px_var(--color-thread-mid-green)/10,0_4px_24px_0_rgba(0,0,0,0.06)]"
+                      : "border-black/5 shadow-premium-light"
+                  }`}
                 >
-                  <div className="w-11 h-11 rounded-full bg-[var(--color-thread-light-green)] text-[var(--color-thread-mid-green)] flex items-center justify-center mb-6">
+                  <div className={`w-11 h-11 rounded-full flex items-center justify-center mb-6 transition-colors duration-300 ${
+                    hasContext
+                      ? "bg-[var(--color-thread-mid-green)]/10 text-[var(--color-thread-mid-green)]"
+                      : "bg-[var(--color-thread-light-green)] text-[var(--color-thread-mid-green)]"
+                  }`}>
                     <Icon className="w-5 h-5 stroke-[1.8]" />
                   </div>
                   <span className="text-[0.66rem] tracking-[0.16em] uppercase text-slate-400 font-medium mb-2 block">
@@ -113,10 +133,17 @@ export default function NewChildPreviewPage({ onPageChange }: NewChildPreviewPag
                     {section.description}
                   </p>
                   <div className="mt-5 flex items-center justify-between">
-                    <div className="inline-flex items-center gap-2 text-[0.74rem] font-medium uppercase tracking-[0.12em] text-slate-400">
-                      <Lock className="w-3.5 h-3.5" />
-                      Opens after assessment
-                    </div>
+                    {hasContext ? (
+                      <div className="inline-flex items-center gap-2 text-[0.74rem] font-medium text-[var(--color-thread-mid-green)]">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        {section.unlockedHint}
+                      </div>
+                    ) : (
+                      <div className="inline-flex items-center gap-2 text-[0.74rem] font-medium uppercase tracking-[0.12em] text-slate-400">
+                        <Lock className="w-3.5 h-3.5" />
+                        Opens after assessment
+                      </div>
+                    )}
                     <ActionLink onClick={() => window.location.href = "/setup"}>
                       Questionnaire
                     </ActionLink>
