@@ -46,7 +46,7 @@ export const TimelineStep = React.forwardRef<HTMLDivElement, TimelineStepProps>(
             {title}
           </div>
           <div className="flex gap-3.5 flex-wrap items-center mt-1.5 text-[0.78rem] text-[var(--color-thread-gray)]">
-            <span className="text-[0.6rem] tracking-[0.12em] uppercase font-bold text-[var(--color-thread-mid-green)]">
+            <span className="text-[0.6rem] tracking-[0.12em] uppercase font-medium text-[var(--color-thread-mid-green)]">
               {resolvedMetaTag}
             </span>
             <span>{meta}</span>

@@ -1,7 +1,6 @@
 import { ReactNode } from "react";
 import Sidebar from "./Sidebar";
 import TopBar from "./TopBar";
-import AddChildModal from "./AddChildModal";
 import { Page, Child } from "../types";
 import { AnimatePresence } from "motion/react";
 
@@ -11,18 +10,14 @@ interface DashboardLayoutProps {
   children: ReactNode;
   currentPage: Page;
   onPageChange: (page: Page) => void;
-  isAddChildModalOpen: boolean;
   onAddChildRequest: () => void;
-  onCloseAddChildModal: () => void;
 }
 
 export default function DashboardLayout({
   children,
   currentPage,
   onPageChange,
-  isAddChildModalOpen,
   onAddChildRequest,
-  onCloseAddChildModal,
 }: DashboardLayoutProps) {
   const { currentChild, childrenList, setChild, addChild } = useCurrentChild();
 
@@ -33,9 +28,6 @@ export default function DashboardLayout({
       <main className="flex-1 flex flex-col overflow-hidden">
         <TopBar
           currentPage={currentPage}
-          currentChild={currentChild}
-          childrenList={childrenList}
-          onChildChange={setChild}
           onAddChildRequest={onAddChildRequest}
           onPageChange={onPageChange}
         />
@@ -46,12 +38,6 @@ export default function DashboardLayout({
           <AnimatePresence mode="wait">{children}</AnimatePresence>
         </div>
       </main>
-
-      <AddChildModal
-        isOpen={isAddChildModalOpen}
-        onClose={onCloseAddChildModal}
-        onAdd={addChild}
-      />
     </div>
   );
 }

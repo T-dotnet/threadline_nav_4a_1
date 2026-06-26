@@ -12,7 +12,7 @@ export function Avatar({ className, fallback, src, alt, size = "md", ...props }:
   return (
     <div
       className={cn(
-        "rounded-full flex items-center justify-center font-semibold transition-all overflow-hidden shrink-0",
+        "rounded-full flex items-center justify-center font-medium transition-all overflow-hidden shrink-0",
         {
           "w-[32px] h-[32px] text-[0.82rem]": size === "sm",
           "w-[40px] h-[40px] text-[0.86rem]": size === "md",

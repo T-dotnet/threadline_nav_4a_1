@@ -26,7 +26,7 @@ export function InsightSection({
         )}
       >
         <div className="bg-white rounded-br-[32px] p-7.5 flex flex-col h-full">
-          <span className="text-[0.66rem] tracking-[0.14em] uppercase text-[var(--color-thread-mid-green)] font-bold mb-6">
+          <span className="text-[0.66rem] tracking-[0.14em] uppercase text-[var(--color-thread-mid-green)] font-medium mb-6">
             {kicker}
           </span>
           <h3 className="text-[1.8rem] font-medium tracking-tight leading-tight mb-4 text-slate-900">

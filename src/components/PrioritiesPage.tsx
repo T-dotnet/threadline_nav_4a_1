@@ -29,6 +29,8 @@ import pediatricianImg from "../assets/images/pediatrician_questions_thumbnail_1
 import { PageContainer } from "./ui/PageContainer";
 
 import { useCurrentChild } from "../context/ChildContext";
+import { SetupSummary } from "./ui/SetupSummary";
+import watercolorBgImg from "../assets/images/watercolor_bg_1782427011739.jpg";
 
 export default function PrioritiesPage({
   onPageChange,
@@ -85,7 +87,7 @@ export default function PrioritiesPage({
         kicker="Priorities · What matters most"
         title="Where to focus — and why."
         titleClassName="text-[2.2rem] xs:text-[2.6rem] sm:text-[3.2rem] md:text-[4rem] leading-[1.15] md:leading-[4.5rem] max-w-[16ch]"
-        className="mb-28"
+        className={currentChild.isNew ? "mb-12" : "mb-28"}
         description={
           <div className="flex gap-4.5 text-[0.82rem] text-[var(--color-thread-gray)] flex-wrap">
             <span className="flex items-center gap-1.5">
@@ -100,132 +102,195 @@ export default function PrioritiesPage({
         }
       />
 
-      <FadeInScroll className="mb-24">
-        <HeroQuoteCard
-          kicker="How we prioritise"
-          quote={
-            isLiam
-              ? "Liam has met his core goals. We now prioritize advanced social integration and leadership-readiness milestones."
-              : `We don't hand you a list of everything. We rank what matters by its real impact on ${currentChild.name} — and show the reasoning behind every call.`
-          }
-          className="h-full"
-          rightNode={
-            <HeroActionCard
-              icon={<Download className="w-[22px] h-[22px] stroke-[1.7]" />}
-              title="Priority list"
-              subtitle="Download PDF"
+      {currentChild.isNew ? (
+        <FadeInScroll className="mb-24">
+          <div className="w-full overflow-hidden border border-black/5 rounded-t-[32px] shadow-none bg-[var(--hero-bg)]">
+            <div className="w-full h-[200px] overflow-hidden relative">
+              <img
+                src={watercolorBgImg}
+                alt="Watercolor Accent"
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+            <HeroQuoteCard
+              kicker="How we prioritise"
+              quote={
+                isLiam
+                  ? "Liam has met his core goals. We now prioritize advanced social integration and leadership-readiness milestones."
+                  : `We don't hand you a list of everything. We rank what matters by its real impact on ${currentChild.name} — and show the reasoning behind every call.`
+              }
+              className="rounded-none shadow-none border-t border-black/5"
+              rightNode={
+                <HeroActionCard
+                  icon={<Download className="w-[22px] h-[22px] stroke-[1.7]" />}
+                  title="Priority list"
+                  subtitle="Download PDF"
+                />
+              }
+              action={
+                <p className="text-[0.84rem] opacity-70 relative leading-relaxed max-w-[48ch]">
+                  Each priority is weighed by{" "}
+                  <strong className="opacity-100">functional impact</strong>,{" "}
+                  <strong className="opacity-100">developmental risk</strong>,{" "}
+                  <strong className="opacity-100">family burden</strong>,{" "}
+                  <strong className="opacity-100">family capacity</strong>, and{" "}
+                  <strong className="opacity-100">
+                    how priorities depend on one another
+                  </strong>
+                  .
+                </p>
+              }
             />
-          }
-          action={
-            <p className="text-[0.84rem] opacity-70 relative leading-relaxed max-w-[48ch]">
-              Each priority is weighed by{" "}
-              <strong className="opacity-100">functional impact</strong>,{" "}
-              <strong className="opacity-100">developmental risk</strong>,{" "}
-              <strong className="opacity-100">family burden</strong>,{" "}
-              <strong className="opacity-100">family capacity</strong>, and{" "}
-              <strong className="opacity-100">
-                how priorities depend on one another
-              </strong>
-              .
-            </p>
-          }
-        />
-      </FadeInScroll>
+          </div>
+        </FadeInScroll>
+      ) : (
+        <FadeInScroll className="mb-24">
+          <HeroQuoteCard
+            kicker="How we prioritise"
+            quote={
+              isLiam
+                ? "Liam has met his core goals. We now prioritize advanced social integration and leadership-readiness milestones."
+                : `We don't hand you a list of everything. We rank what matters by its real impact on ${currentChild.name} — and show the reasoning behind every call.`
+            }
+            className="h-full"
+            rightNode={
+              <HeroActionCard
+                icon={<Download className="w-[22px] h-[22px] stroke-[1.7]" />}
+                title="Priority list"
+                subtitle="Download PDF"
+              />
+            }
+            action={
+              <p className="text-[0.84rem] opacity-70 relative leading-relaxed max-w-[48ch]">
+                Each priority is weighed by{" "}
+                <strong className="opacity-100">functional impact</strong>,{" "}
+                <strong className="opacity-100">developmental risk</strong>,{" "}
+                <strong className="opacity-100">family burden</strong>,{" "}
+                <strong className="opacity-100">family capacity</strong>, and{" "}
+                <strong className="opacity-100">
+                  how priorities depend on one another
+                </strong>
+                .
+              </p>
+            }
+          />
+        </FadeInScroll>
+      )}
 
       <FadeInScroll className="mb-24">
-        <div>
-          <SectionLabel>
-            Now · Next · Later
-          </SectionLabel>
-          <SectionTitle>
-            {isLiam ? "Everything is on track." : "Three priorities, in order."}
-          </SectionTitle>
-        </div>
+        {currentChild.isNew ? (
+          <div className="space-y-6">
+            <div>
+              <SectionLabel>
+                Setup Progress
+              </SectionLabel>
+              <SectionTitle>
+                Complete your family setup.
+              </SectionTitle>
+            </div>
+            <SetupSummary 
+              childName={currentChild.name} 
+              onContinueQuestionnaire={() => window.location.href = '/setup'} 
+            />
+          </div>
+        ) : (
+          <>
+            <div>
+              <SectionLabel>
+                Now · Next · Later
+              </SectionLabel>
+              <SectionTitle>
+                {isLiam ? "Everything is on track." : "Three priorities, in order."}
+              </SectionTitle>
+            </div>
 
-        <div className="mt-6 flex flex-col">
-          {isLiam ? (
-            <>
-              <TimelineItem
-                tag="Done"
-                title="Transitional Irritability"
-                meta="Completed · Strategic co-regulation in place"
-                content="Liam has internalised several calming routines. He now identifies frustration triggers early and self-corrects without adult intervention in 90% of observed sessions."
-                facts={{
-                  "Functional impact": "High",
-                  "Success rate": "Strong",
-                  "Family burden": "Low",
-                  "Family capacity": "Strong",
-                }}
-                dependency="This success allows us to move towards <strong>Advanced Creative Depth</strong>."
-                progress={100}
-                active
-                isCollapsible={false}
-              />
-              <TimelineItem
-                tag="Done"
-                title="Task Retention"
-                meta="Completed · Excellent creative depth"
-                content="Memory and task sequencing are now strengths. Liam can follow multi-step instructions and remain engaged in complex play for over 45 minutes."
-                facts={{
-                  "Retention score": "High",
-                  "Task completion": "Strong",
-                  "Clinical confidence": "High",
-                }}
-                dependency="Liam is ready for <strong>Peer Leadership</strong> roles in small group settings."
-                progress={100}
-                isCollapsible={false}
-              />
-            </>
-          ) : (
-            <>
-              <TimelineItem
-                tag="Now"
-                title="Classroom attention"
-                meta="High impact · clearest theme across every source"
-                content={`Trouble staying focused in class is currently the biggest drag on ${currentChild.name}'s learning and self-confidence. Addressing it first tends to make other supports work better too.`}
-                facts={{
-                  "Functional impact": "High",
-                  "Developmental risk": "Moderate",
-                  "Family burden": "Moderate",
-                  "Family capacity": "Strong",
-                }}
-                dependency="Progress here should also ease <strong>Emotional regulation</strong> and <strong>school participation</strong>."
-                progress={35}
-                active
-                isCollapsible={false}
-              />
-              <TimelineItem
-                tag="Next"
-                title="Emotional regulation at home"
-                meta="Moderate impact · prepare over coming months"
-                content="Frustration around homework and changes in routine is real, and it's hard on home life. But it sits downstream of attention — so we expect it to ease as focus improves. That's why it's next, not now: tackling attention first does double duty."
-                facts={{
-                  "Functional impact": "Moderate",
-                  "Emotional distress": "Moderate",
-                  "Family burden": "High",
-                  "Depends on": "Attention",
-                }}
-                dependency="Linked to <strong>Classroom attention</strong> — we'll revisit this as that improves."
-                progress={15}
-                isCollapsible={false}
-              />
-              <TimelineItem
-                tag="Later"
-                title="Friendships & social connection"
-                meta="Safe to wait · currently a strength"
-                content={`${currentChild.name} has warm, steady friendships and real empathy — this is going well, so it doesn't need your attention today. Naming it 'later' is deliberate: it means you can set it down without worrying you've missed something.`}
-                facts={{
-                  "Functional impact": "Low",
-                  "Developmental risk": "Low",
-                }}
-                dependency="We'll surface this again if anything changes."
-                progress={0}
-                isCollapsible={false}
-              />
-            </>
-          )}
-          <div className="border-b border-black/10" />
-        </div>
+            <div className="mt-6 flex flex-col">
+              {isLiam ? (
+                <>
+                  <TimelineItem
+                    tag="Done"
+                    title="Transitional Irritability"
+                    meta="Completed · Strategic co-regulation in place"
+                    content="Liam has internalised several calming routines. He now identifies frustration triggers early and self-corrects without adult intervention in 90% of observed sessions."
+                    facts={{
+                      "Functional impact": "High",
+                      "Success rate": "Strong",
+                      "Family burden": "Low",
+                      "Family capacity": "Strong",
+                    }}
+                    dependency="This success allows us to move towards <strong>Advanced Creative Depth</strong>."
+                    progress={100}
+                    active
+                    isCollapsible={false}
+                  />
+                  <TimelineItem
+                    tag="Done"
+                    title="Task Retention"
+                    meta="Completed · Excellent creative depth"
+                    content="Memory and task sequencing are now strengths. Liam can follow multi-step instructions and remain engaged in complex play for over 45 minutes."
+                    facts={{
+                      "Retention score": "High",
+                      "Task completion": "Strong",
+                      "Clinical confidence": "High",
+                    }}
+                    dependency="Liam is ready for <strong>Peer Leadership</strong> roles in small group settings."
+                    progress={100}
+                    isCollapsible={false}
+                  />
+                </>
+              ) : (
+                <>
+                  <TimelineItem
+                    tag="Now"
+                    title="Classroom attention"
+                    meta="High impact · clearest theme across every source"
+                    content={`Trouble staying focused in class is currently the biggest drag on ${currentChild.name}'s learning and self-confidence. Addressing it first tends to make other supports work better too.`}
+                    facts={{
+                      "Functional impact": "High",
+                      "Developmental risk": "Moderate",
+                      "Family burden": "Moderate",
+                      "Family capacity": "Strong",
+                    }}
+                    dependency="Progress here should also ease <strong>Emotional regulation</strong> and <strong>school participation</strong>."
+                    progress={35}
+                    active
+                    isCollapsible={false}
+                  />
+                  <TimelineItem
+                    tag="Next"
+                    title="Emotional regulation at home"
+                    meta="Moderate impact · prepare over coming months"
+                    content="Frustration around homework and changes in routine is real, and it's hard on home life. But it sits downstream of attention — so we expect it to ease as focus improves. That's why it's next, not now: tackling attention first does double duty."
+                    facts={{
+                      "Functional impact": "Moderate",
+                      "Emotional distress": "Moderate",
+                      "Family burden": "High",
+                      "Depends on": "Attention",
+                    }}
+                    dependency="Linked to <strong>Classroom attention</strong> — we'll revisit this as that improves."
+                    progress={15}
+                    isCollapsible={false}
+                  />
+                  <TimelineItem
+                    tag="Later"
+                    title="Friendships & social connection"
+                    meta="Safe to wait · currently a strength"
+                    content={`${currentChild.name} has warm, steady friendships and real empathy — this is going well, so it doesn't need your attention today. Naming it 'later' is deliberate: it means you can set it down without worrying you've missed something.`}
+                    facts={{
+                      "Functional impact": "Low",
+                      "Developmental risk": "Low",
+                    }}
+                    dependency="We'll surface this again if anything changes."
+                    progress={0}
+                    isCollapsible={false}
+                  />
+                </>
+              )}
+              <div className="border-b border-black/10" />
+            </div>
+          </>
+        )}
       </FadeInScroll>
 
       {/* Connect Section */}
@@ -234,9 +299,11 @@ export default function PrioritiesPage({
           <SectionLabel>
             How these connect
           </SectionLabel>
-          <SectionTitle>
-            Priorities aren't independent.
-          </SectionTitle>
+          {!currentChild.isNew && (
+            <SectionTitle>
+              Priorities aren't independent.
+            </SectionTitle>
+          )}
         </div>
         <div className="flex items-center gap-4 max-md:flex-col max-md:items-stretch mb-6 w-full">
           {prioritiesData.map((priority) => (

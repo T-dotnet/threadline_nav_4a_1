@@ -28,6 +28,7 @@ import { PageFooterCTA } from "./ui/PageFooterCTA";
 import { PageContainer } from "./ui/PageContainer";
 
 import { useCurrentChild } from "../context/ChildContext";
+import watercolorBgImg from "../assets/images/watercolor_bg_1782427011739.jpg";
 
 export default function RoadmapPage({
   onPageChange,
@@ -36,6 +37,7 @@ export default function RoadmapPage({
 }) {
   const { currentChild } = useCurrentChild();
   const isLiam = currentChild.name === "Liam";
+  const isNewChild = Boolean(currentChild.isNew);
 
   return (
     <motion.div
@@ -46,9 +48,9 @@ export default function RoadmapPage({
       <PageContainer>
         <PageHeader
         kicker="Roadmap · What to do"
-        title={isLiam ? "Plan complete." : "Your plan, in clear steps."}
+        title={isNewChild ? "Your setup, in clear steps." : isLiam ? "Plan complete." : "Your plan, in clear steps."}
         titleClassName="text-[2.2rem] xs:text-[2.6rem] sm:text-[3.2rem] md:text-[4rem] leading-[1.15] md:leading-[4.5rem] max-w-[16ch]"
-        className="mb-24"
+        className={isNewChild ? "mb-12" : "mb-24"}
         description={
           <div className="flex gap-4.5 text-[0.82rem] text-[var(--color-thread-gray)] flex-wrap">
             <span className="flex items-center gap-1.5">
@@ -57,16 +59,29 @@ export default function RoadmapPage({
             </span>
             <span className="flex items-center gap-1.5">
               <Layers className="w-[15px] h-[15px] stroke-[1.8] text-[var(--color-thread-mid-green)]" />{" "}
-              Sequenced to build on itself
+              {isNewChild ? "Assessment pending" : "Sequenced to build on itself"}
             </span>
           </div>
         }
       />
 
+      {isNewChild && (
+        <div className="w-full h-[200px] rounded-t-[24px] sm:rounded-t-[32px] overflow-hidden relative border border-black/5">
+          <img
+            src={watercolorBgImg}
+            alt="Watercolor Accent"
+            className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+          />
+        </div>
+      )}
+
       <HeroQuoteCard
         kicker="The plan"
         quote={
-          isLiam
+          isNewChild
+            ? `A short setup roadmap for getting ready for ${currentChild.name}'s first session. Finish the essentials, add useful context if you have it, then the clinical roadmap opens after review.`
+            : isLiam
             ? "Liam has successfully navigated the core roadmap. All initial intervention steps are finalized and verified."
             : "A short, prioritised plan — not a 40-page report. A few things to do, in an order where each step makes the next one easier."
         }
@@ -74,16 +89,16 @@ export default function RoadmapPage({
         rightNode={
           <HeroActionCard
             icon={<Download className="w-[22px] h-[22px] stroke-[1.7]" />}
-            title="Roadmap"
-            subtitle="Download PDF"
+            title={isNewChild ? "Setup roadmap" : "Roadmap"}
+            subtitle={isNewChild ? "Preview PDF" : "Download PDF"}
           />
         }
         action={
-          <div className="font-semibold text-[0.84rem] opacity-70">
+          <div className="font-medium text-[0.84rem] opacity-70">
             Focused on{" "}
             <strong className="opacity-100 ml-1">
-              {isLiam ? "Maintenance & Enrichment" : "Classroom attention"}
-            </strong> · {isLiam ? "Goal status: 100%" : "your Now priority"}
+              {isNewChild ? "Intake setup" : isLiam ? "Maintenance & Enrichment" : "Classroom attention"}
+            </strong> · {isNewChild ? "assessment pending" : isLiam ? "Goal status: 100%" : "your Now priority"}
           </div>
         }
       />
@@ -104,7 +119,31 @@ export default function RoadmapPage({
           {/* Vertical Line */}
           <div className="absolute left-[11px] top-3.5 bottom-5 w-[2px] bg-black/10" />
 
-          {isLiam ? (
+          {isNewChild ? (
+            <>
+              <TimelineStep
+                active
+                title="Finish the questionnaire"
+                meta="Before session · You"
+                metaTag="Now"
+                description={`Your everyday observations give the clinician useful context before ${currentChild.name}'s first session.`}
+              />
+              <TimelineStep
+                todo
+                title="Add reports, notes, or school documents"
+                meta="Before session · Optional"
+                metaTag="Optional"
+                description="Upload anything that helps explain what you are seeing. You can add more later."
+              />
+              <TimelineStep
+                todo
+                title="Attend the first session"
+                meta="Thu 26 June · Telehealth"
+                metaTag="Booked"
+                description="After clinical review, the assessment pages will open with real priorities and next steps."
+              />
+            </>
+          ) : isLiam ? (
             <>
               <TimelineStep
                 done
@@ -157,53 +196,55 @@ export default function RoadmapPage({
       </FadeInScroll>
 
       {/* Strategies Section */}
-      <FadeInScroll className="mb-24">
-        <div>
-          <SectionLabel>
-            Strategies that help
-          </SectionLabel>
-          <SectionTitle>
-            Practical things to try.
-          </SectionTitle>
-        </div>
-
-        <div className="relative rounded-br-[36px] p-12 bg-watercolor">
-          <div className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
-            <StrategyCard
-              title="At school"
-              icon={<FileText className="w-[18px] h-[18px] stroke-[1.8]" />}
-              items={isLiam ? [
-                "Liam leads small peer groups during creative projects.",
-                "Utilize advanced logic puzzles for extension during down time.",
-                "Monthly check-in with teacher to maintain social velocity.",
-              ] : [
-                `Seat ${currentChild.name} near the front, away from busy walkways and windows.`,
-                "Break tasks into short, clear chunks with quick check-ins.",
-                "Use visual timers and simple written checklists.",
-                "Agree a quiet signal for when she's drifting, instead of calling it out.",
-              ]}
-              cornerClass="rounded-tr-[28px]"
-              className="shadow-premium border border-black/[0.03]"
-            />
-            <StrategyCard
-              title="At home"
-              icon={<Home className="w-[18px] h-[18px] stroke-[1.8]" />}
-              items={isLiam ? [
-                "Encourage independent hobby exploration (e.g., coding, building).",
-                "Shift from co-regulation to independent reflection sessions.",
-                "Allow Liam to choose his own organizational tools.",
-              ] : [
-                "Keep homework at the same time and place each day.",
-                "Short focused bursts with movement breaks between them.",
-                "Clear the workspace of phones, screens and clutter.",
-                "Notice and name what went well, however small.",
-              ]}
-              cornerClass="rounded-bl-[28px]"
-              className="shadow-premium border border-black/[0.03]"
-            />
+      {!isNewChild && (
+        <FadeInScroll className="mb-24">
+          <div>
+            <SectionLabel>
+              Strategies that help
+            </SectionLabel>
+            <SectionTitle>
+              Practical things to try.
+            </SectionTitle>
           </div>
-        </div>
-      </FadeInScroll>
+
+          <div className="relative rounded-br-[36px] p-12 bg-watercolor">
+            <div className="grid grid-cols-2 gap-6 max-md:grid-cols-1">
+              <StrategyCard
+                title="At school"
+                icon={<FileText className="w-[18px] h-[18px] stroke-[1.8]" />}
+                items={isLiam ? [
+                  "Liam leads small peer groups during creative projects.",
+                  "Utilize advanced logic puzzles for extension during down time.",
+                  "Monthly check-in with teacher to maintain social velocity.",
+                ] : [
+                  `Seat ${currentChild.name} near the front, away from busy walkways and windows.`,
+                  "Break tasks into short, clear chunks with quick check-ins.",
+                  "Use visual timers and simple written checklists.",
+                  "Agree a quiet signal for when she's drifting, instead of calling it out.",
+                ]}
+                cornerClass="rounded-tr-[28px]"
+                className="shadow-premium border border-black/[0.03]"
+              />
+              <StrategyCard
+                title="At home"
+                icon={<Home className="w-[18px] h-[18px] stroke-[1.8]" />}
+                items={isLiam ? [
+                  "Encourage independent hobby exploration (e.g., coding, building).",
+                  "Shift from co-regulation to independent reflection sessions.",
+                  "Allow Liam to choose his own organizational tools.",
+                ] : [
+                  "Keep homework at the same time and place each day.",
+                  "Short focused bursts with movement breaks between them.",
+                  "Clear the workspace of phones, screens and clutter.",
+                  "Notice and name what went well, however small.",
+                ]}
+                cornerClass="rounded-bl-[28px]"
+                className="shadow-premium border border-black/[0.03]"
+              />
+            </div>
+          </div>
+        </FadeInScroll>
+      )}
 
       {/* Supports Section */}
       <FadeInScroll className="mb-24">
@@ -216,7 +257,9 @@ export default function RoadmapPage({
           </SectionTitle>
         </div>
         <SectionDescription className="mb-6">
-          {isLiam ? (
+          {isNewChild ? (
+            `Optional ways to give the clinician more context before ${currentChild.name}'s assessment. Use what is useful; nothing here needs to become a new task list.`
+          ) : isLiam ? (
             "Liam's support structure is now self-sustaining. These options are for future enrichment."
           ) : (
             `Only what's likely to help, given where ${currentChild.name} is now. Explore these at your own pace, with your clinician.`
@@ -225,19 +268,19 @@ export default function RoadmapPage({
 
         <div className="border-b border-black/10">
           <AreaItem
-            title={isLiam ? "Leadership mentorship" : "School support plan"}
-            description={isLiam ? "Connecting Liam with older student mentors to foster leadership skills." : "Formalise the classroom accommodations so they hold steady across teachers and terms."}
-            status={isLiam ? "Suggested" : "Suggested"}
+            title={isNewChild ? "Upload existing reports" : isLiam ? "Leadership mentorship" : "School support plan"}
+            description={isNewChild ? "Add any previous assessments, school notes, examples of work, or health letters you already have." : isLiam ? "Connecting Liam with older student mentors to foster leadership skills." : "Formalise the classroom accommodations so they hold steady across teachers and terms."}
+            status={isNewChild ? "Optional" : "Suggested"}
           />
           <AreaItem
-            title={isLiam ? "Creative Logic Course" : "Occupational therapy — focus & regulation"}
-            description={isLiam ? "External curriculum to keep Liam's high creative retention challenged." : "Worth considering if the home strategies need more hands-on support down the track."}
+            title={isNewChild ? "Share school context" : isLiam ? "Creative Logic Course" : "Occupational therapy — focus & regulation"}
+            description={isNewChild ? "Bring teacher notes, recent feedback, or a few examples of what feels harder at school." : isLiam ? "External curriculum to keep Liam's high creative retention challenged." : "Worth considering if the home strategies need more hands-on support down the track."}
             status={isLiam ? "Optional" : "Optional"}
           />
           <AreaItem
-            title={isLiam ? "Annual Review" : "GP / paediatric review"}
-            description={isLiam ? "Scheduled baseline check to ensure maintenance phase remains stable." : "Keep your GP in the loop so medical options can be discussed if and when they're relevant."}
-            status="In place"
+            title={isNewChild ? "Keep a short observation note" : isLiam ? "Annual Review" : "GP / paediatric review"}
+            description={isNewChild ? "Jot down patterns around routines, transitions, sleep, friendships, or school days if they stand out." : isLiam ? "Scheduled baseline check to ensure maintenance phase remains stable." : "Keep your GP in the loop so medical options can be discussed if and when they're relevant."}
+            status={isNewChild ? "Optional" : "In place"}
           />
         </div>
       </FadeInScroll>

@@ -11,7 +11,7 @@ export function ClinicalWeighting({ facts, className }: ClinicalWeightingProps) 
 
   return (
     <div className={`bg-white p-6 rounded-none rounded-tr-[36px] h-fit ${className || ""}`}>
-      <span className="text-[0.6rem] tracking-[0.14em] uppercase text-slate-500 font-semibold mb-3 block">
+      <span className="text-[0.6rem] tracking-[0.14em] uppercase text-slate-500 font-medium mb-3 block">
         Clinical weighting
       </span>
       <div className="grid grid-cols-2 gap-x-12 gap-y-1 max-md:grid-cols-1">

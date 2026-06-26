@@ -56,6 +56,7 @@ const liamData = [
 import { PageContainer } from "./ui/PageContainer";
 
 import { useCurrentChild } from "../context/ChildContext";
+import watercolorBgImg from "../assets/images/watercolor_bg_1782427011739.jpg";
 
 export default function ReviewsPage({
   onPageChange,
@@ -77,7 +78,7 @@ export default function ReviewsPage({
         kicker="Reviews · How we're progressing"
         title={`How ${currentChild.name}'s doing over time.`}
         titleClassName="text-[2.2rem] xs:text-[2.6rem] sm:text-[3.2rem] md:text-[4rem] leading-[1.15] md:leading-[4.5rem] max-w-[16ch]"
-        className="mb-24"
+        className={currentChild.isNew ? "mb-12" : "mb-24"}
         description={
           <div className="flex gap-4.5 text-[0.82rem] text-[var(--color-thread-gray)] flex-wrap">
             <span className="flex items-center gap-1.5">
@@ -91,6 +92,17 @@ export default function ReviewsPage({
           </div>
         }
       />
+
+      {currentChild.isNew && (
+        <div className="w-full h-[200px] rounded-t-[24px] sm:rounded-t-[32px] overflow-hidden relative border border-black/5">
+          <img
+            src={watercolorBgImg}
+            alt="Watercolor Accent"
+            className="w-full h-full object-cover"
+            referrerPolicy="no-referrer"
+          />
+        </div>
+      )}
 
       <HeroQuoteCard
         kicker="The long view"
@@ -122,7 +134,7 @@ export default function ReviewsPage({
                 {isLiam ? "100% · complete" : "65% · on track"}
               </span>
             </div>
-            <div className="inline-flex items-center gap-2 mt-1.5 relative font-semibold text-[0.84rem] opacity-80">
+            <div className="inline-flex items-center gap-2 mt-1.5 relative font-medium text-[0.84rem] opacity-80">
               {isLiam ? "Maintenance tracking enabled" : "Next full review · 12 September"}
             </div>
           </div>

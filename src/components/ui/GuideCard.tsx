@@ -39,7 +39,7 @@ export function GuideCard({
           {title}
         </h3>
         <div className="flex gap-3.5 flex-wrap items-center mb-3 text-[0.78rem] text-[var(--color-thread-gray)] font-sans">
-          <span className="text-[0.6rem] tracking-[0.12em] uppercase font-bold text-[var(--color-thread-mid-green)]">
+          <span className="text-[0.6rem] tracking-[0.12em] uppercase font-medium text-[var(--color-thread-mid-green)]">
             {category}
           </span>
           <span>{readTime}</span>
@@ -48,7 +48,7 @@ export function GuideCard({
           {description}
         </p>
         <div className="flex items-center justify-between pt-4 mt-6">
-          <ActionLink variant="slate" as="span" className="group-hover:text-[var(--color-thread-mid-green)] font-semibold text-[0.84rem]">
+          <ActionLink variant="slate" as="span" className="group-hover:text-[var(--color-thread-mid-green)] font-medium text-[0.84rem]">
             {actionText}
           </ActionLink>
         </div>

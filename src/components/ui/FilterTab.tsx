@@ -1,9 +1,9 @@
 import * as React from "react"
-import { motion } from "motion/react"
+import { motion, HTMLMotionProps } from "motion/react"
 import { cn } from "../../lib/utils"
 import { buttonPress } from "../../lib/motion-presets"
 
-export interface FilterTabProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+export interface FilterTabProps extends HTMLMotionProps<"button"> {
   active?: boolean;
   label: string;
 }

@@ -157,7 +157,7 @@ export default function EmergingDetailsPage({
         </div>
 
         <div className="mt-10 mb-24">
-          <h3 className="text-[1.25rem] font-semibold text-[var(--color-thread-heading)] mb-3.5 tracking-tight">
+          <h3 className="text-[1.25rem] font-medium text-[var(--color-thread-heading)] mb-3.5 tracking-tight">
             Watchlist philosophy
           </h3>
           <p className="text-[1.05rem] text-[var(--color-thread-gray)] leading-relaxed max-w-[72ch]">

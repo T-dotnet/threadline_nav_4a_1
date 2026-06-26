@@ -31,13 +31,13 @@ export const listItem: Variants = {
   }
 };
 
-export const scaleHover = {
+export const scaleHover: any = {
   whileHover: { scale: 1.01 },
   whileTap: { scale: 0.98 },
   transition: { type: "spring", stiffness: 400, damping: 25 }
 };
 
-export const buttonPress = {
+export const buttonPress: any = {
   whileTap: { scale: 0.97 },
   transition: { type: "spring", stiffness: 500, damping: 30 }
 };

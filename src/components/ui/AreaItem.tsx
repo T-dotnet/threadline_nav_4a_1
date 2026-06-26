@@ -38,13 +38,13 @@ export const AreaItem = React.forwardRef<HTMLDivElement, AreaItemProps>(
                 layout="col"
                 align="end"
                 variant="default"
-                labelClassName="font-semibold"
+                labelClassName="font-medium"
               />
             )}
             {status && (
               <span
                 className={cn(
-                  "text-[0.6rem] tracking-[0.1em] uppercase font-bold px-2.75 py-1.5 rounded-full flex items-center gap-1.5 whitespace-nowrap mt-0.75",
+                  "text-[0.6rem] tracking-[0.1em] uppercase font-medium px-2.75 py-1.5 rounded-full flex items-center gap-1.5 whitespace-nowrap mt-0.75",
                   (status === "Suggested" || status === "Strength" || status === "Complete") &&
                     "bg-[var(--color-thread-light-green)] text-[var(--color-thread-mid-green)]",
                   (status === "Optional" || status === "Steady") &&
@@ -79,7 +79,7 @@ export const AreaItem = React.forwardRef<HTMLDivElement, AreaItemProps>(
                 key={s}
                 className="text-[0.7rem] text-[var(--color-thread-gray)] border border-black/10 rounded-full px-2.5 py-1"
               >
-                <strong className="text-[var(--color-thread-dark-slate)] font-semibold">
+                <strong className="text-[var(--color-thread-dark-slate)] font-medium">
                   {s}
                 </strong>
               </span>

@@ -32,7 +32,7 @@ class ErrorBoundary extends Component<Props, State> {
       return (
         <div className="min-h-screen flex items-center justify-center bg-red-50 p-4 font-sans">
           <div className="max-w-md w-full bg-white rounded-2xl p-8 shadow-xl border border-red-100">
-            <h1 className="text-2xl font-bold text-red-600 mb-4">Something went wrong</h1>
+            <h1 className="text-2xl font-medium text-red-600 mb-4">Something went wrong</h1>
             <p className="text-slate-600 mb-6">
               The application encountered an unexpected error. This might be due to a script loading failure or a runtime exception.
             </p>
@@ -44,7 +44,7 @@ class ErrorBoundary extends Component<Props, State> {
             </div>
             <button
               onClick={() => window.location.reload()}
-              className="w-full bg-red-600 text-white font-semibold py-3 rounded-xl hover:bg-red-700 transition-colors"
+              className="w-full bg-red-600 text-white font-medium py-3 rounded-xl hover:bg-red-700 transition-colors"
             >
               Reload Application
             </button>

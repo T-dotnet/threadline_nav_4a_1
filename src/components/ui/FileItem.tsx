@@ -27,7 +27,7 @@ export function FileItem({
           {name}
         </div>
         <div className="flex items-center gap-3.5 mt-1.5 text-[0.78rem] text-[var(--color-thread-gray)]">
-          <span className="text-[0.6rem] tracking-[0.12em] uppercase font-bold text-[var(--color-thread-mid-green)]">
+          <span className="text-[0.6rem] tracking-[0.12em] uppercase font-medium text-[var(--color-thread-mid-green)]">
             {typeName}
           </span>
           <span>

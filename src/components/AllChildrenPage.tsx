@@ -36,12 +36,26 @@ export default function AllChildrenPage({
   }, []);
 
   // Helper to retrieve child-specific premium synthesis quote and progression details
-  const getChildSynthesisData = (childName: string) => {
-    switch (childName) {
+  const getChildSynthesisData = (child: Child) => {
+    if (child.isNew) {
+      return {
+        quote: `We're gathering the full picture for ${child.name}. The assessment pages will open after the first session and clinical review.`,
+        evidenceLevel: 1,
+        evidenceText: "Intake in progress",
+        progress: 0,
+        progressText: "assessment pending",
+        nextReview: "Session booked",
+        accentColor: "text-amber-600",
+        theme: "white",
+      };
+    }
+
+    switch (child.name) {
       case "Liam":
         return {
           quote: "Liam has achieved all current developmental milestones for this phase; focus now shifts to long-term enrichment and peer-leadership skills.",
           evidenceLevel: 3,
+          evidenceText: "Strong formulation",
           progress: 100,
           progressText: "all goals met — maintenance phase",
           nextReview: "12 December",
@@ -52,6 +66,7 @@ export default function AllChildrenPage({
         return {
           quote: "Sophia exhibits brilliant verbal reasoning and high peer sensitivity, but academic organization challenges necessitate visual scheduling aids.",
           evidenceLevel: 3,
+          evidenceText: "Strong formulation",
           progress: 58,
           progressText: "good pacing — steady progress",
           nextReview: "24 September",
@@ -63,6 +78,7 @@ export default function AllChildrenPage({
         return {
           quote: "Maya is showing marked improvements in auditory processing, though focus remains heavily tethered to circadian stability.",
           evidenceLevel: 3,
+          evidenceText: "Strong formulation",
           progress: 65,
           progressText: "on track — steady progress",
           nextReview: "12 September",
@@ -94,7 +110,7 @@ export default function AllChildrenPage({
 
       <div className="flex flex-col gap-16">
         {childrenList.map((child, index) => {
-          const childData = getChildSynthesisData(child.name);
+          const childData = getChildSynthesisData(child);
           const isGreenTheme = childData.theme === "green";
 
           return (
@@ -110,7 +126,7 @@ export default function AllChildrenPage({
               {/* Child Section Row Header */}
               <div className="flex items-center justify-between mb-8 flex-wrap gap-4">
                 <div className="flex items-center gap-4">
-                  <div className="w-[44px] h-[44px] rounded-full bg-[var(--color-thread-mid-green)] text-white flex items-center justify-center font-semibold text-[1.05rem] font-serif shadow-sm">
+                  <div className="w-[44px] h-[44px] rounded-full bg-[var(--color-thread-mid-green)] text-white flex items-center justify-center font-medium text-[1.05rem] font-serif shadow-sm">
                     {child.initial}
                   </div>
                   <div>
@@ -118,7 +134,7 @@ export default function AllChildrenPage({
                       {child.name}'s Profile
                     </h2>
                     <span className="text-[0.84rem] text-slate-500 font-medium block mt-1">
-                      Age {child.age} · Developmental track
+                      Age {child.age} · {child.isNew ? "Intake in progress" : "Developmental track"}
                     </span>
                   </div>
                 </div>
@@ -131,7 +147,7 @@ export default function AllChildrenPage({
                   icon={ArrowRight}
                   className="text-[0.88rem]"
                 >
-                  Manage {child.name}'s Dashboard
+                  {child.isNew ? "Open Intake Home" : `Manage ${child.name}'s Dashboard`}
                 </ActionLink>
               </div>
 
@@ -146,19 +162,44 @@ export default function AllChildrenPage({
                   kicker="Clinician Synthesis Summary"
                   quote={childData.quote}
                   evidenceLevel={childData.evidenceLevel}
-                  evidenceText="Strong formulation"
+                  evidenceText={childData.evidenceText}
                   evidenceVariant={isGreenTheme ? 'green' : 'default'}
                   action={
-                    <Button
-                      onClick={() => {
-                        setChild(child);
-                        onPageChange("understanding");
-                      }}
-                      variant={isGreenTheme ? "white" : "mint"}
-                      rightIcon={<ChevronRight className="w-3.5 h-3.5 stroke-[2]" />}
-                    >
-                      Open Insights
-                    </Button>
+                    child.isNew ? (
+                      <div className="flex flex-wrap gap-3">
+                        <Button
+                          onClick={() => {
+                            setChild(child);
+                            window.location.href = "/setup";
+                          }}
+                          variant="forest"
+                          rightIcon={<ChevronRight className="w-3.5 h-3.5 stroke-[2]" />}
+                        >
+                          Continue setup
+                        </Button>
+                        <Button
+                          onClick={() => {
+                            setChild(child);
+                            onPageChange("home");
+                          }}
+                          variant="mint"
+                          rightIcon={<ChevronRight className="w-3.5 h-3.5 stroke-[2]" />}
+                        >
+                          Open intake home
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        onClick={() => {
+                          setChild(child);
+                          onPageChange("understanding");
+                        }}
+                        variant={isGreenTheme ? "white" : "mint"}
+                        rightIcon={<ChevronRight className="w-3.5 h-3.5 stroke-[2]" />}
+                      >
+                        Open Insights
+                      </Button>
+                    )
                   }
                 />
 

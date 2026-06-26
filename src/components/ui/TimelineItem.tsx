@@ -57,7 +57,7 @@ export function TimelineItem({
         <div className="flex-1 flex flex-col items-start gap-1.5 md:flex-row md:items-center md:gap-4">
           <span
             className={cn(
-              "text-[0.75rem] tracking-[0.15em] font-bold md:w-12 flex-shrink-0 uppercase",
+              "text-[0.75rem] tracking-[0.15em] font-medium md:w-12 flex-shrink-0 uppercase",
               active
                 ? "text-[var(--color-thread-mid-green)]"
                 : "text-[var(--color-thread-placeholder)]",
@@ -116,7 +116,7 @@ export function TimelineItem({
                 )}>
                   <div className="space-y-6">
                     <div>
-                      <span className="text-[0.6rem] tracking-[0.14em] uppercase text-slate-500 font-semibold mb-2 block">
+                      <span className="text-[0.6rem] tracking-[0.14em] uppercase text-slate-500 font-medium mb-2 block">
                         Why this matters most
                       </span>
                       <p className="text-[0.96rem] text-slate-500 leading-relaxed max-w-[60ch]">

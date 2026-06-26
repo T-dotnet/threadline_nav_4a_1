@@ -18,7 +18,7 @@ export const IconItem = React.forwardRef<HTMLDivElement, IconItemProps>(
           <Icon className={cn('w-6 h-6 text-[var(--color-thread-mid-green)]', iconClassName)} />
         </div>
         <div>
-          <h4 className="font-semibold text-slate-900 text-[0.95rem] mb-1">{title}</h4>
+          <h4 className="font-medium text-slate-900 text-[0.95rem] mb-1">{title}</h4>
           {description && (
             <p className="text-sm text-slate-600 leading-relaxed">
               {description}

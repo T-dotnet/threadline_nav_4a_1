@@ -14,6 +14,7 @@ import {
 import { Page } from "../types";
 import { cn } from "../lib/utils";
 import { motion } from "motion/react";
+import { useCurrentChild } from "../context/ChildContext";
 
 interface SidebarProps {
   currentPage: Page;
@@ -22,8 +23,9 @@ interface SidebarProps {
 
 export default function Sidebar({ currentPage, onPageChange }: SidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(true);
+  const { currentChild } = useCurrentChild();
 
-  const navItems = [
+  const assessedNavItems = [
     { id: "home", label: "Home", icon: Home },
     { id: "understanding", label: "Understanding", icon: Info },
     { id: "priorities", label: "Priorities", icon: ListTodo },
@@ -32,6 +34,12 @@ export default function Sidebar({ currentPage, onPageChange }: SidebarProps) {
     { id: "resources", label: "Resources", icon: BookOpen },
     { id: "documents", label: "Documents", icon: Lock },
   ] as const;
+  const newChildNavItems = [
+    { id: "home", label: "Home", icon: Home },
+    { id: "understanding", label: "Understanding", icon: Info },
+    { id: "resources", label: "Resources", icon: BookOpen },
+  ] as const;
+  const navItems = currentChild.isNew ? newChildNavItems : assessedNavItems;
 
   const isAllChildrenPage = currentPage === "all-children";
 
@@ -85,7 +93,7 @@ export default function Sidebar({ currentPage, onPageChange }: SidebarProps) {
           <span className="font-serif font-medium text-[1.22rem] tracking-tight whitespace-nowrap text-[var(--color-thread-heading)]">
             Threadline
           </span>
-          <span className="font-sans text-[0.55rem] tracking-[0.22em] uppercase text-[var(--color-thread-gray)] font-semibold mt-1 whitespace-nowrap">
+          <span className="font-sans text-[0.55rem] tracking-[0.22em] uppercase text-[var(--color-thread-gray)] font-medium mt-1 whitespace-nowrap">
             Safe Harbor
           </span>
         </div>
@@ -102,7 +110,7 @@ export default function Sidebar({ currentPage, onPageChange }: SidebarProps) {
               className={cn(
                 "flex items-center gap-3.5 px-3 py-3 rounded-xl text-[var(--color-thread-muted-green)] font-medium text-[0.92rem] transition-all cursor-pointer hover:bg-black/5 hover:text-[var(--color-thread-dark-slate)] relative group/nav min-h-[44px]",
                 currentPage === item.id &&
-                  "bg-[var(--color-thread-light-green)] text-[var(--color-thread-dark-slate)] font-semibold",
+                  "bg-[var(--color-thread-light-green)] text-[var(--color-thread-dark-slate)] font-medium",
               )}
             >
               <item.icon className="w-[19px] h-[19px] stroke-[1.8] flex-shrink-0" />
@@ -132,7 +140,7 @@ export default function Sidebar({ currentPage, onPageChange }: SidebarProps) {
             className={cn(
               "flex items-center gap-3.5 px-3 py-3 rounded-lg text-[var(--color-thread-muted-green)] font-medium text-[0.92rem] transition-all cursor-pointer hover:bg-black/5 hover:text-[var(--color-thread-dark-slate)] w-full min-h-[44px]",
               currentPage === "settings" &&
-                "bg-[var(--color-thread-light-green)] text-[var(--color-thread-dark-slate)] font-semibold",
+                "bg-[var(--color-thread-light-green)] text-[var(--color-thread-dark-slate)] font-medium",
             )}
           >
             <Settings className="w-[19px] h-[19px] stroke-[1.8] flex-shrink-0" />

@@ -1,9 +1,19 @@
-export type Page = 'home' | 'understanding' | 'priorities' | 'roadmap' | 'reviews' | 'resources' | 'documents' | 'settings' | 'emerging-details' | 'all-children' | 'style-guide';
+export type Page = 'home' | 'preview' | 'understanding' | 'priorities' | 'roadmap' | 'reviews' | 'resources' | 'documents' | 'settings' | 'emerging-details' | 'all-children' | 'style-guide';
 
 export interface Child {
   name: string;
   age: number;
   initial: string;
+  isNew?: boolean;
+  intake?: {
+    relation?: string;
+    notices?: string[];
+    notes?: string;
+    sessionDay?: string;
+    sessionTime?: string;
+    questionnaireAnswers?: Record<string, unknown>;
+    completedQuestionnaireSections?: string[];
+  };
 }
 
 export interface Priority {

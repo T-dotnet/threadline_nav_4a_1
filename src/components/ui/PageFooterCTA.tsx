@@ -34,7 +34,7 @@ export const PageFooterCTA = React.forwardRef<HTMLDivElement, PageFooterCTAProps
               <Button
                 variant="link"
                 onClick={onBackClick}
-                className="text-[0.92rem] font-semibold flex items-center gap-2 border-b-0 pb-0"
+                className="text-[0.92rem] font-medium flex items-center gap-2 border-b-0 pb-0"
                 leftIcon={<ArrowRight className="w-4 h-4 rotate-180" />}
               >
                 {backText}

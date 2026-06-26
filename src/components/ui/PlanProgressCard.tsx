@@ -29,7 +29,7 @@ export function PlanProgressCard({
         className
       )}
     >
-      <span className="text-[0.68rem] tracking-[0.12em] uppercase opacity-75 font-bold mb-5 block flex-shrink-0">
+      <span className="text-[0.68rem] tracking-[0.12em] uppercase opacity-75 font-medium mb-5 block flex-shrink-0">
         {title}
       </span>
       
@@ -58,7 +58,7 @@ export function PlanProgressCard({
           <Calendar className="w-4 h-4 stroke-[1.8]" />
           <span>
             Next review:{" "}
-            <strong className="opacity-100 font-semibold ml-1">
+            <strong className="opacity-100 font-medium ml-1">
               {nextReview}
             </strong>
           </span>

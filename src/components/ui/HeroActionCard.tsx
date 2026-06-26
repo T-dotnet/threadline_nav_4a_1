@@ -19,7 +19,7 @@ export function HeroActionCard({ icon, title, subtitle, className, ...props }: H
       {...props}
     >
       <PageIcon icon={icon} className="mx-auto" />
-      <span className="font-semibold text-[1.05rem] tracking-tight block">
+      <span className="font-medium text-[1.05rem] tracking-tight block">
         {title}
       </span>
       {subtitle && (

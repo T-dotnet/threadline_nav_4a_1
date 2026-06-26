@@ -95,7 +95,9 @@ export default function SettingsPage({
     document.documentElement.setAttribute("data-hero-secondary", newStyle);
   };
 
-  const getNextReview = (name: string) => {
+  const getNextReview = (child: Child) => {
+    if (child.isNew) return "Assessment pending";
+    const name = child.name;
     if (name === "Maya") return "12 September";
     if (name === "Liam") return "18 October";
     if (name === "Sophia") return "24 September";
@@ -111,10 +113,10 @@ export default function SettingsPage({
     >
       <PageContainer>
         <div className="mb-24">
-        <span className="text-[0.66rem] tracking-[0.2em] uppercase text-slate-500 font-semibold mb-3 block">
+        <span className="text-[0.66rem] tracking-[0.2em] uppercase text-slate-500 font-medium mb-3 block">
           Account & Workspace Configs
         </span>
-        <h1 className="font-semibold text-[2rem] leading-tight tracking-tight mb-3">
+        <h1 className="font-medium text-[2rem] leading-tight tracking-tight mb-3">
           Settings
         </h1>
         <p className="text-[1.05rem] text-slate-500 max-w-[50ch]">
@@ -125,7 +127,7 @@ export default function SettingsPage({
 
       <div className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr] gap-12 mb-16 border-b border-black/10 pb-16">
         <div>
-          <h2 className="text-[1.1rem] font-semibold text-slate-900 tracking-tight">
+          <h2 className="text-[1.1rem] font-medium text-slate-900 tracking-tight">
             Parent Metadata
           </h2>
           <p className="text-[0.9rem] text-slate-500 mt-2 leading-relaxed">
@@ -135,7 +137,7 @@ export default function SettingsPage({
         </div>
         <div className="bg-white rounded-tr-[36px] p-8 shadow-premium-light">
           <div className="mb-6">
-            <label className="text-[0.66rem] tracking-[0.16em] uppercase text-slate-500 font-bold mb-2.5 block">
+            <label className="text-[0.66rem] tracking-[0.16em] uppercase text-slate-500 font-medium mb-2.5 block">
               Primary Parent Nickname
             </label>
             <Input
@@ -145,7 +147,7 @@ export default function SettingsPage({
             />
           </div>
           <div className="mb-8" id="notification-settings-section">
-            <label className="text-[0.66rem] tracking-[0.16em] uppercase text-slate-500 font-bold mb-2.5 block">
+            <label className="text-[0.66rem] tracking-[0.16em] uppercase text-slate-500 font-medium mb-2.5 block">
               Contact Notification Email
             </label>
             <Input
@@ -178,7 +180,7 @@ export default function SettingsPage({
 
       <div className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr] gap-12">
         <div>
-          <h2 className="text-[1.1rem] font-semibold text-slate-900 tracking-tight">
+          <h2 className="text-[1.1rem] font-medium text-slate-900 tracking-tight">
             Registered Children Profiles
           </h2>
           <p className="text-[0.9rem] text-slate-500 mt-2 leading-relaxed">
@@ -220,16 +222,15 @@ export default function SettingsPage({
                   )}
                 >
                   <div className="flex items-center gap-4">
-                    <div className="w-[46px] h-[46px] rounded-full bg-[var(--color-thread-light-green)] text-[var(--color-thread-mid-green)] flex items-center justify-center font-semibold text-[1.2rem] font-serif flex-shrink-0">
+                    <div className="w-[46px] h-[46px] rounded-full bg-[var(--color-thread-light-green)] text-[var(--color-thread-mid-green)] flex items-center justify-center font-medium text-[1.2rem] font-serif flex-shrink-0">
                       {child.initial}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-[1.1rem] text-slate-900 tracking-tight">
+                      <h3 className="font-medium text-[1.1rem] text-slate-900 tracking-tight">
                         {child.name}
                       </h3>
                       <p className="text-[0.84rem] text-slate-500 mt-0.5">
-                        Age {child.age} · Next Review on{" "}
-                        {getNextReview(child.name)}
+                        Age {child.age} · {child.isNew ? "Session booked · Assessment pending" : `Next Review on ${getNextReview(child)}`}
                       </p>
                     </div>
                   </div>
@@ -237,7 +238,7 @@ export default function SettingsPage({
                   {isActive ? (
                     <div className="flex items-center gap-2 text-[var(--color-thread-mid-green)] bg-[var(--color-thread-light-green)]/40 px-3.5 py-1.5 rounded-full">
                       <Check className="w-3.5 h-3.5 stroke-[2.5]" />
-                      <span className="text-[0.74rem] font-bold tracking-wide uppercase">
+                      <span className="text-[0.74rem] font-medium tracking-wide uppercase">
                         Currently Active
                       </span>
                     </div>
@@ -245,7 +246,7 @@ export default function SettingsPage({
                     <motion.button
                       whileTap={{ scale: 0.98 }}
                       onClick={() => setChild(child)}
-                      className="text-[0.84rem] font-semibold text-slate-600 hover:text-slate-900 bg-[var(--color-thread-off-white)] hover:bg-[var(--color-thread-light-green)] border border-black/5 px-5 py-3 rounded-full transition-colors whitespace-nowrap min-h-[44px]"
+                      className="text-[0.84rem] font-medium text-slate-600 hover:text-slate-900 bg-[var(--color-thread-off-white)] hover:bg-[var(--color-thread-light-green)] border border-black/5 px-5 py-3 rounded-full transition-colors whitespace-nowrap min-h-[44px]"
                     >
                       Switch Active
                     </motion.button>
@@ -260,7 +261,7 @@ export default function SettingsPage({
       {/* Dynamic Theme & Colors Config Section */}
       <div className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr] gap-12 mt-16 border-t border-black/10 pt-16">
         <div>
-          <h2 className="text-[1.1rem] font-semibold text-slate-900 tracking-tight">
+          <h2 className="text-[1.1rem] font-medium text-slate-900 tracking-tight">
             Interface Theme & Colors
           </h2>
           <p className="text-[0.9rem] text-slate-500 mt-2 leading-relaxed">
@@ -270,7 +271,7 @@ export default function SettingsPage({
         <div className="space-y-6">
           {/* Theme Option Row */}
           <div className="bg-white p-6 rounded-tr-[36px] shadow-premium-light border border-black/5">
-            <span className="text-[0.66rem] tracking-[0.16em] uppercase text-slate-400 font-bold mb-3.5 block">
+            <span className="text-[0.66rem] tracking-[0.16em] uppercase text-slate-400 font-medium mb-3.5 block">
               Primary Theme Mood
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -285,7 +286,7 @@ export default function SettingsPage({
                 )}
               >
                 <div className="flex flex-col">
-                  <span className="font-semibold text-[0.95rem] text-slate-900">Energetic Mint</span>
+                  <span className="font-medium text-[0.95rem] text-slate-900">Energetic Mint</span>
                   <span className="text-[0.74rem] text-slate-500 mt-0.5">Vibrant Emerald focus</span>
                 </div>
                 {theme === "energetic" && (
@@ -306,7 +307,7 @@ export default function SettingsPage({
                 )}
               >
                 <div className="flex flex-col">
-                  <span className="font-semibold text-[0.95rem] text-slate-900">Classic Vintage</span>
+                  <span className="font-medium text-[0.95rem] text-slate-900">Classic Vintage</span>
                   <span className="text-[0.74rem] text-slate-500 mt-0.5">Deep forest clinical prestige</span>
                 </div>
                 {theme === "classic" && (
@@ -320,7 +321,7 @@ export default function SettingsPage({
 
           {/* Font Option Row */}
           <div className="bg-white p-6 rounded-tl-[36px] shadow-premium-light border border-black/5">
-            <span className="text-[0.66rem] tracking-[0.16em] uppercase text-slate-400 font-bold mb-3.5 block">
+            <span className="text-[0.66rem] tracking-[0.16em] uppercase text-slate-400 font-medium mb-3.5 block">
               Serif Typography Style
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
@@ -370,13 +371,13 @@ export default function SettingsPage({
 
           {/* Hero & Card Styles Row */}
           <div className="bg-white p-6 rounded-br-[36px] shadow-premium-light border border-black/5">
-            <span className="text-[0.66rem] tracking-[0.16em] uppercase text-slate-400 font-bold mb-3.5 block">
+            <span className="text-[0.66rem] tracking-[0.16em] uppercase text-slate-400 font-medium mb-3.5 block">
               Theme Accents & Contrast Pairs
             </span>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Hero Canvas Card Toggle */}
               <div className="flex flex-col gap-2">
-                <span className="text-[0.7rem] font-bold text-slate-500 uppercase tracking-wider">
+                <span className="text-[0.7rem] font-medium text-slate-500 uppercase tracking-wider">
                   Primary Hero Cards
                 </span>
                 <div className="flex bg-slate-100 rounded-xl p-1.5 border border-black/5">
@@ -384,7 +385,7 @@ export default function SettingsPage({
                     whileTap={{ scale: 0.98 }}
                     onClick={() => handleHeroStyleChange("white")}
                     className={cn(
-                      "flex-1 text-center py-3 text-[0.82rem] font-semibold rounded-lg transition-all cursor-pointer min-h-[44px]",
+                      "flex-1 text-center py-3 text-[0.82rem] font-medium rounded-lg transition-all cursor-pointer min-h-[44px]",
                       heroStyle === "white"
                         ? "bg-white text-slate-900 shadow-sm"
                         : "text-slate-500 hover:text-slate-900"
@@ -396,7 +397,7 @@ export default function SettingsPage({
                     whileTap={{ scale: 0.98 }}
                     onClick={() => handleHeroStyleChange("green")}
                     className={cn(
-                      "flex-1 text-center py-3 text-[0.82rem] font-semibold rounded-lg transition-all cursor-pointer min-h-[44px]",
+                      "flex-1 text-center py-3 text-[0.82rem] font-medium rounded-lg transition-all cursor-pointer min-h-[44px]",
                       heroStyle === "green"
                         ? "bg-[var(--color-thread-mid-green)] text-white shadow-sm"
                         : "text-slate-500 hover:text-slate-900"
@@ -409,7 +410,7 @@ export default function SettingsPage({
 
               {/* Secondary Card Toggle */}
               <div className="flex flex-col gap-2">
-                <span className="text-[0.7rem] font-bold text-slate-500 uppercase tracking-wider">
+                <span className="text-[0.7rem] font-medium text-slate-500 uppercase tracking-wider">
                   Secondary Highlights
                 </span>
                 <div className="flex bg-slate-100 rounded-xl p-1.5 border border-black/5">
@@ -417,7 +418,7 @@ export default function SettingsPage({
                     whileTap={{ scale: 0.98 }}
                     onClick={() => handleSecondaryStyleChange("light")}
                     className={cn(
-                      "flex-1 text-center py-3 text-[0.82rem] font-semibold rounded-lg transition-all cursor-pointer min-h-[44px]",
+                      "flex-1 text-center py-3 text-[0.82rem] font-medium rounded-lg transition-all cursor-pointer min-h-[44px]",
                       secondaryStyle === "light"
                         ? "bg-white text-slate-900 shadow-sm"
                         : "text-slate-500 hover:text-slate-900"
@@ -429,7 +430,7 @@ export default function SettingsPage({
                     whileTap={{ scale: 0.98 }}
                     onClick={() => handleSecondaryStyleChange("dark")}
                     className={cn(
-                      "flex-1 text-center py-3 text-[0.82rem] font-semibold rounded-lg transition-all cursor-pointer min-h-[44px]",
+                      "flex-1 text-center py-3 text-[0.82rem] font-medium rounded-lg transition-all cursor-pointer min-h-[44px]",
                       secondaryStyle === "dark"
                         ? "bg-[var(--color-thread-dark-forest)] text-white shadow-sm"
                         : "text-slate-500 hover:text-slate-900"
@@ -447,7 +448,7 @@ export default function SettingsPage({
       {/* Style Guide Audit Block */}
       <div className="grid grid-cols-1 md:grid-cols-[1fr_1.5fr] gap-12 mt-16 border-t border-black/10 pt-16">
         <div>
-          <h2 className="text-[1.1rem] font-semibold text-slate-900 tracking-tight">
+          <h2 className="text-[1.1rem] font-medium text-slate-900 tracking-tight">
             Design Tokens & Styles
           </h2>
           <p className="text-[0.9rem] text-slate-500 mt-2 leading-relaxed">
@@ -458,7 +459,7 @@ export default function SettingsPage({
         <div>
           <div className="bg-white p-6 rounded-tr-[36px] shadow-premium-light flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
             <div>
-              <h3 className="font-semibold text-[1.1rem] text-slate-900 tracking-tight">
+              <h3 className="font-medium text-[1.1rem] text-slate-900 tracking-tight">
                 Scanned Style Guide
               </h3>
               <p className="text-[0.84rem] text-slate-500 mt-0.5">
@@ -468,7 +469,7 @@ export default function SettingsPage({
             <motion.button
               whileTap={{ scale: 0.98 }}
               onClick={() => onPageChange("style-guide")}
-              className="text-[0.84rem] font-semibold text-[var(--color-thread-mid-green)] hover:text-white bg-[var(--color-thread-light-green)] hover:bg-[var(--color-thread-mid-green)] px-6 py-3 rounded-full transition-all whitespace-nowrap inline-flex items-center gap-1.5 shadow-sm min-h-[44px]"
+              className="text-[0.84rem] font-medium text-[var(--color-thread-mid-green)] hover:text-white bg-[var(--color-thread-light-green)] hover:bg-[var(--color-thread-mid-green)] px-6 py-3 rounded-full transition-all whitespace-nowrap inline-flex items-center gap-1.5 shadow-sm min-h-[44px]"
             >
               Open Design Guide <ChevronRight className="w-4 h-4" />
             </motion.button>

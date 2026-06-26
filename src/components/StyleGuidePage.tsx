@@ -32,7 +32,12 @@ import {
   FileText,
   Share2,
   Lock,
-  Settings
+  Settings,
+  Database,
+  Users,
+  Layout,
+  Maximize,
+  Columns
 } from "lucide-react";
 import { useState } from "react";
 import { Page } from "../types";
@@ -58,6 +63,8 @@ import { IconButton } from "./ui/IconButton";
 import { QuickLink } from "./ui/QuickLink";
 import { ValueCard } from "./ui/ValueCard";
 import { HeroActionCard } from "./ui/HeroActionCard";
+import { AICopilotBar } from "./ui/AICopilotBar";
+import { ChecklistItem } from "./ui/ChecklistItem";
 
 import { PageContainer } from "./ui/PageContainer";
 
@@ -188,20 +195,60 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
 
   // Color Definitions from index.css
   const colors = [
-    { name: "Mid Green (Unified Primary Accent)", value: "#108560", variable: "var(--color-thread-mid-green)", desc: "Main brand action color, active states, active progression bars. Consolidated with Theme Forest and Deep Forest." },
-    { name: "Dark Forest (Theme Forest - Consolidated)", value: "#108560", variable: "var(--color-thread-dark-forest)", desc: "Consolidated with Mid Green for design minimalism and unified visual focus." },
-    { name: "Deep Forest (Dark Accent - Consolidated)", value: "#108560", variable: "var(--color-thread-deep-forest)", desc: "Consolidated with Mid Green for design minimalism and unified visual focus." },
-    { name: "Light Green (Soft Background)", value: "#E6F4ED", variable: "var(--color-thread-light-green)", desc: "Subtle backgrounds, select item states, buttons highlight background" },
-    { name: "Cream (Warm Contrast)", value: "#EEE9D9", variable: "var(--color-thread-cream)", desc: "Cozy warm layout dividers, container outlines, retro accents" },
-    { name: "Off White (Main Canvas)", value: "#F5F7F6", variable: "var(--color-thread-off-white)", desc: "Body and slate-level background canvases across pages" },
-    { name: "Dark Slate (Body Copy)", value: "#1F2937", variable: "var(--color-thread-dark-slate)", desc: "Standard high contrast reading text and labels" },
-    { name: "Gray (Secondary Text)", value: "#6B7280", variable: "var(--color-thread-gray)", desc: "De-emphasized subtitles, clinical review timestamps, metadata" },
+    { 
+      name: "Mid Green (Primary Accent)", 
+      value: theme === "energetic" ? "#108560" : "#2A5B4A", 
+      variable: "var(--color-thread-mid-green)", 
+      desc: "Main brand action color, active states, active progression bars. Consolidated with Theme Forest and Deep Forest." 
+    },
+    { 
+      name: "Light Green (Soft Background)", 
+      value: theme === "energetic" ? "#E6F4ED" : "#E3EBE7", 
+      variable: "var(--color-thread-light-green)", 
+      desc: "Subtle backgrounds, select item states, buttons highlight background" 
+    },
+    { 
+      name: "Heading Green", 
+      value: theme === "energetic" ? "#0B4636" : "#16362D", 
+      variable: "var(--color-thread-heading)", 
+      desc: "Primary heading color, used for titles and core identity typography." 
+    },
+    { 
+      name: "Darkest (High Contrast)", 
+      value: theme === "energetic" ? "#0A1F1B" : "#0B1613", 
+      variable: "var(--color-thread-darkest)", 
+      desc: "Deepest emerald for maximum contrast text and dark UI elements." 
+    },
+    { 
+      name: "Cream (Warm Contrast)", 
+      value: "#EEE9D9", 
+      variable: "var(--color-thread-cream)", 
+      desc: "Cozy warm layout dividers, container outlines, retro accents" 
+    },
+    { 
+      name: "Off White (Main Canvas)", 
+      value: theme === "energetic" ? "#F5F7F6" : "#F5F5F5", 
+      variable: "var(--color-thread-off-white)", 
+      desc: "Body and slate-level background canvases across pages" 
+    },
+    { 
+      name: "Dark Slate (Body Copy)", 
+      value: "#1F2937", 
+      variable: "var(--color-thread-dark-slate)", 
+      desc: "Standard high contrast reading text and labels" 
+    },
+    { 
+      name: "Gray (Secondary Text)", 
+      value: "#6B7280", 
+      variable: "var(--color-thread-gray)", 
+      desc: "De-emphasized subtitles, clinical review timestamps, metadata" 
+    },
   ];
 
   // Font families description from index.css and source code
   const fonts = [
     {
-      family: 'Hero Page Title (Fraunces display)',
+      family: `Hero Page Title (${font === 'modern-serif' ? 'Fraunces' : 'Frank Ruhl'} display)`,
       usage: "Primary visual anchor of main pages. Sets an empathetic, premium, human clinical-arts mood.",
       sample: "Here's where to put your energy today, Sarah.",
       classes: "font-serif text-[3.8rem] leading-[4.3rem] tracking-[-0.075rem] text-[var(--color-thread-heading)]",
@@ -210,7 +257,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
       weight: "400 (Regular)"
     },
     {
-      family: 'Subheading / Key Quote (Fraunces serif)',
+      family: `Subheading / Key Quote (${font === 'modern-serif' ? 'Fraunces' : 'Frank Ruhl'} serif)`,
       usage: "Key synthesis callouts, clinician diagnosis blocks, and core priority summaries.",
       sample: "“Maya is showing marked improvements in auditory processing, though focus remains heavily tethered to circadian stability.”",
       classes: "font-serif text-[1.55rem] leading-[1.34] tracking-tight text-[var(--hero-text)] font-normal",
@@ -219,7 +266,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
       weight: "400 (Regular)"
     },
     {
-      family: 'Card Title / Section Header (Fraunces medium-serif)',
+      family: `Card Title / Section Header (${font === 'modern-serif' ? 'Fraunces' : 'Frank Ruhl'} medium-serif)`,
       usage: "Container category headers, interactive module titles, and diagnostic row headers.",
       sample: "Transition Support & School Letters",
       classes: "font-serif text-[1.25rem] text-[var(--color-thread-heading)] font-normal",
@@ -228,7 +275,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
       weight: "400 (Regular)"
     },
     {
-      family: 'Child Row Card Title (Fraunces medium-serif)',
+      family: `Child Row Card Title (${font === 'modern-serif' ? 'Fraunces' : 'Frank Ruhl'} medium-serif)`,
       usage: "Individual child visual cards and directory list main titles.",
       sample: "Maya",
       classes: "font-serif font-normal text-[1.8rem] tracking-tight leading-none text-[var(--color-thread-heading)]",
@@ -237,7 +284,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
       weight: "400 (Regular)"
     },
     {
-      family: 'Clinician Synthesis Quote (Fraunces serif [1.38rem])',
+      family: `Clinician Synthesis Quote (${font === 'modern-serif' ? 'Fraunces' : 'Frank Ruhl'} serif)`,
       usage: "Compact clinician summary narratives, professional quotes, and clinical evidence callouts.",
       sample: "“Maya finds it hard to sustain focus in structured tasks, especially in the classroom.”",
       classes: "font-serif font-normal text-[1.38rem] leading-[1.4] tracking-tight text-[var(--color-thread-heading)]",
@@ -258,7 +305,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
       family: 'Secondary Card Heading (Sans-serif Semibold)',
       usage: "Sub-section headings, card inner group titles, and primary grid module names.",
       sample: "Priority Milestones & Development Track",
-      classes: "font-sans font-semibold text-[1.12rem] tracking-tight text-slate-900",
+      classes: "font-sans font-medium text-[1.12rem] tracking-tight text-slate-900",
       size: "1.12rem (17.9px)",
       lineHeight: "Default",
       weight: "600 (Semibold)"
@@ -267,13 +314,13 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
       family: 'Tertiary Widget Heading / Action Label (Sans-serif Small Bold)',
       usage: "Context labels, form section separators, small card item headers, and grid subtitles.",
       sample: "Recommended Focus Area",
-      classes: "font-sans font-bold text-[0.88rem] tracking-tight text-slate-800",
+      classes: "font-sans font-medium text-[0.88rem] tracking-tight text-slate-800",
       size: "0.88rem (14px)",
       lineHeight: "Default",
       weight: "700 (Bold)"
     },
     {
-      family: 'Serif Display Numerals & Percentages (Fraunces Display for statistics)',
+      family: `Serif Display Numerals & Percentages (${font === 'modern-serif' ? 'Fraunces' : 'Frank Ruhl'} Display)`,
       usage: "Large-format scores, percentages, milestone metrics counters, and key numerical figures.",
       sample: "95% achieved",
       classes: "font-serif text-[3.2rem] leading-none tracking-tight text-[var(--color-thread-heading)]",
@@ -294,7 +341,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
       family: 'Tracked Upper Tags & Labels (Bold upper tracking)',
       usage: "Section dividers, context tags, evidence formulation status ('STRONG FORMULATION'), time of day indicators, and dashboard category prefixes.",
       sample: "STRONG FORMULATION  ·  FAMILY SYNTHESIS  ·  TUESDAY MORNING",
-      classes: "text-[0.68rem] tracking-[0.12em] uppercase font-bold text-[var(--color-thread-mid-green)] font-sans",
+      classes: "text-[0.68rem] tracking-[0.12em] uppercase font-medium text-[var(--color-thread-mid-green)] font-sans",
       size: "0.68rem (10.8px)",
       lineHeight: "Default",
       weight: "700 (Bold)"
@@ -303,7 +350,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
       family: 'Interaction Button Copy (Semi-bold Pill Sans)',
       usage: "Primary and secondary action buttons with high click clarity and clean inner spacing curves.",
       sample: "Learn more insights",
-      classes: "font-sans font-semibold text-[0.82rem] leading-none text-slate-800",
+      classes: "font-sans font-medium text-[0.82rem] leading-none text-slate-800",
       size: "0.82rem (13px)",
       lineHeight: "1 (none)",
       weight: "600 (Semibold)"
@@ -312,7 +359,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
       family: 'Interactive Text Link (Underlined inline action)',
       usage: "Nested page navigators, subtle secondary actions, external references, and toggle buttons.",
       sample: "Style Guide & Design Tokens",
-      classes: "font-sans text-[0.84rem] font-semibold underline underline-offset-2 text-[var(--color-thread-dark-forest)] hover:text-[var(--color-thread-deep-forest)] transition-colors inline",
+      classes: "font-sans text-[0.84rem] font-medium underline underline-offset-2 text-[var(--color-thread-dark-forest)] hover:text-[var(--color-thread-deep-forest)] transition-colors inline",
       size: "0.84rem (13.4px)",
       lineHeight: "Default",
       weight: "600 (Semibold)"
@@ -321,7 +368,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
       family: 'Clinical Metrics / Status Stamps (High accuracy Monospace)',
       usage: "Evidence metrics ratios, date timestamps, system coordinates, or background configurations.",
       sample: "0.72rem · MONO · CODE · ACTIVE (3/3)",
-      classes: "font-mono text-[0.72rem] text-slate-500 tracking-normal font-semibold uppercase",
+      classes: "font-mono text-[0.72rem] text-slate-500 tracking-normal font-medium uppercase",
       size: "0.72rem (11.5px)",
       lineHeight: "Default",
       weight: "600 (Semibold)"
@@ -339,7 +386,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
       family: 'Diagnostic Observer Source Pill (Mini Capsule Label)',
       usage: "Miniature pill-badges detailing contributors to an observed trait (such as 'You', 'Teacher', 'Clinician', 'Maya').",
       sample: "You · Teacher · Clinician · Maya",
-      classes: "font-sans text-[0.7rem] font-semibold text-[var(--color-thread-dark-slate)]",
+      classes: "font-sans text-[0.7rem] font-medium text-[var(--color-thread-dark-slate)]",
       size: "0.7rem (11.2px)",
       lineHeight: "Default",
       weight: "600 (Semibold)"
@@ -359,7 +406,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
     {
       variant: 'forest',
       name: 'Forest Primary Action',
-      classCode: 'bg-[var(--color-thread-dark-forest)] text-white font-semibold text-[0.82rem] px-4.5 py-2.5 rounded-full hover:bg-[var(--color-thread-deep-forest)] transition-all shadow-sm',
+      classCode: 'bg-[var(--color-thread-dark-forest)] text-white font-medium text-[0.82rem] px-4.5 py-2.5 rounded-full hover:bg-[var(--color-thread-deep-forest)] transition-all shadow-sm',
       usage: 'Used as the primary visual CTA for heavy clinical actions, saving changes, establishing priorities, and completing main flow checkpoints.',
       whereUsed: 'PrioritiesPage (Add Priority action), AddChildModal (Create custom profile), StyleGuide Page (Forest Presets demo)',
       sampleText: 'Establish Care Milestone'
@@ -367,7 +414,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
     {
       variant: 'mint',
       name: 'Mint Diagnostic Highlight',
-      classCode: 'bg-[var(--color-thread-light-green)] text-[var(--color-thread-heading)] font-semibold text-[0.82rem] px-4.5 py-2.5 rounded-full hover:opacity-95 shadow-sm transition-all',
+      classCode: 'bg-[var(--color-thread-light-green)] text-[var(--color-thread-heading)] font-medium text-[0.82rem] px-4.5 py-2.5 rounded-full hover:opacity-95 shadow-sm transition-all',
       usage: 'Promoting focus area discoveries, displaying emerging clinical patterns, navigating to user resource notes, and interactive medical diagnostics.',
       whereUsed: 'HomePage (Emerging Details navigator link), StyleGuide Page (Mint action triggers, background selectors)',
       sampleText: 'View Emerging Details'
@@ -375,7 +422,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
     {
       variant: 'slate',
       name: 'Slate Global Confirm',
-      classCode: 'bg-slate-900 text-white text-[0.98rem] font-semibold px-6 py-3 rounded-full hover:bg-slate-800 transition-colors shadow-sm',
+      classCode: 'bg-slate-900 text-white text-[0.98rem] font-medium px-6 py-3 rounded-full hover:bg-slate-800 transition-colors shadow-sm',
       usage: 'Utilized across high-importance system inputs, configuration saving prompts, settings modifications, or global dashboard profile settings saves.',
       whereUsed: 'SettingsPage (Save active clinical settings logs), AddChildModal (Primary details trigger callback)',
       sampleText: 'Confirm and Save Plan'
@@ -383,7 +430,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
     {
       variant: 'white',
       name: 'White Contrast',
-      classCode: 'bg-white text-[var(--color-thread-dark-forest)] font-semibold text-[0.82rem] px-4.5 py-2.5 rounded-full hover:bg-slate-50 shadow-sm transition-all',
+      classCode: 'bg-white text-[var(--color-thread-dark-forest)] font-medium text-[0.82rem] px-4.5 py-2.5 rounded-full hover:bg-slate-50 shadow-sm transition-all',
       usage: 'High value interactive actions positioned directly over dark organic backgrounds or custom media card panels.',
       whereUsed: 'TopBar (Active child selector menu items, child context selector buttons), HomePage (File upload dropzone frame)',
       sampleText: 'Upload Assessment File'
@@ -391,7 +438,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
     {
       variant: 'muted',
       name: 'Muted Control',
-      classCode: 'text-[0.84rem] font-semibold text-slate-600 hover:text-slate-900 bg-[var(--color-thread-off-white)] hover:bg-[var(--color-thread-light-green)] border border-black/5 px-4 py-2 rounded-full transition-colors whitespace-nowrap',
+      classCode: 'text-[0.84rem] font-medium text-slate-600 hover:text-slate-900 bg-[var(--color-thread-off-white)] hover:bg-[var(--color-thread-light-green)] border border-black/5 px-4 py-2 rounded-full transition-colors whitespace-nowrap',
       usage: 'Employed for low-destruction secondary actions, settings forms tab controllers, timeline category toggles, or cancelling current configurations.',
       whereUsed: 'SettingsPage (Clear database/logs callbacks), Roadmap Page (Segment selection milestone tabs)',
       sampleText: 'Filter Timeline'
@@ -399,7 +446,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
     {
       variant: 'link',
       name: 'Underlined Link',
-      classCode: 'text-[0.84rem] text-[var(--color-thread-dark-slate)] font-semibold border-b border-[var(--color-thread-dark-slate)] pb-0.5 hover:opacity-70 transition-all',
+      classCode: 'text-[0.84rem] text-[var(--color-thread-dark-slate)] font-medium border-b border-[var(--color-thread-dark-slate)] pb-0.5 hover:opacity-70 transition-all',
       usage: 'Quiet text actions, document lists downloads prompts, expanding deeper diagnostic observations drawers, or minor inline clinical review references.',
       whereUsed: 'HomePage (Priorities secondary drawer links), StyleGuide Page (Preset link items), Document list files index table',
       sampleText: 'Read Full Evaluation Letter'
@@ -484,7 +531,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
       <PageContainer>
         {/* Page Header */}
       <div className="mb-16">
-        <span className="text-[0.75rem] tracking-[0.12em] uppercase text-[var(--color-thread-mid-green)] font-bold mb-4 block">
+        <span className="text-[0.75rem] tracking-[0.12em] uppercase text-[var(--color-thread-mid-green)] font-medium mb-4 block">
           Internal Design Token & Style Audit
         </span>
         <h1 className="font-serif font-normal text-[2.2rem] sm:text-[3.2rem] md:text-[3.8rem] leading-[1.15] md:leading-[4.3rem] tracking-[-0.075rem] text-[var(--color-thread-heading)]">
@@ -527,7 +574,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                 >
                   <button
                     onClick={() => handleCopy(c.value, c.name)}
-                    className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[0.75rem] font-semibold gap-1.5 transition-opacity"
+                    className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-[0.75rem] font-medium gap-1.5 transition-opacity"
                   >
                     {copiedText === c.name ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
                     {copiedText === c.name ? "Copied!" : "Copy Hex"}
@@ -535,7 +582,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                 </div>
 
                 <div>
-                  <h3 className="font-semibold text-[0.92rem] text-slate-800 leading-tight">
+                  <h3 className="font-medium text-[0.92rem] text-slate-800 leading-tight">
                     {c.name}
                   </h3>
                   <code className="text-[0.72rem] text-[var(--color-thread-gray)] font-mono block mt-1.5">
@@ -561,37 +608,37 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
               
               {/* Premium Forest Dark BG */}
-              <div className="bg-[var(--color-thread-dark-forest)] p-6 rounded-tr-[28px] rounded-bl-[20px] shadow-sm border border-black/10 flex flex-col justify-between">
+              <div className="bg-[var(--color-thread-heading)] p-6 rounded-tr-[28px] rounded-bl-[20px] shadow-sm border border-black/10 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-[0.62rem] tracking-[0.12em] uppercase font-bold text-emerald-100 bg-emerald-900/30 px-2 py-0.5 rounded-full">
+                    <span className="text-[0.62rem] tracking-[0.12em] uppercase font-medium text-emerald-100 bg-emerald-900/30 px-2 py-0.5 rounded-full">
                       Dark Background
                     </span>
-                    <span className="text-[0.65rem] font-mono text-emerald-200/40">--color-thread-dark-forest</span>
+                    <span className="text-[0.65rem] font-mono text-emerald-200/40">--color-thread-heading</span>
                   </div>
                   <h4 className="font-serif font-normal text-white text-[1.45rem] tracking-tight leading-tight mb-2">
-                    Premium Forest Slate
+                    Premium Identity Deep
                   </h4>
                   <p className="text-emerald-100/75 text-[0.84rem] leading-relaxed mb-4">
-                    Best for high-priority clinician summaries. Ensures cozy, eyes-safe focus in low-light environments.
+                    Reserved for high-impact headers and deep clinical insights. Provides maximum focus and eye-comfort.
                   </p>
                 </div>
                 <div className="mt-4 pt-4 border-t border-white/10 space-y-2.5">
                   <div className="flex justify-between items-center text-[0.75rem]">
                     <span className="text-emerald-200/70 font-medium">Headings</span>
-                    <span className="text-white font-semibold flex items-center gap-1.5">
+                    <span className="text-white font-medium flex items-center gap-1.5">
                       <span className="w-2.5 h-2.5 rounded-full bg-white" /> White (#FFF)
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-[0.75rem]">
-                    <span className="text-emerald-200/70 font-medium">Body Description</span>
-                    <span className="text-emerald-100/80 font-semibold flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-100/80" /> Emerald 100
+                    <span className="text-emerald-200/70 font-medium">Body Text</span>
+                    <span className="text-emerald-100/80 font-medium flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-100/80" /> Emerald Tint
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-[0.75rem]">
-                    <span className="text-emerald-200/70 font-medium">Accents / Badges</span>
-                    <span className="text-[var(--color-thread-light-green)] font-semibold flex items-center gap-1.5">
+                    <span className="text-emerald-200/70 font-medium">Accents</span>
+                    <span className="text-[var(--color-thread-light-green)] font-medium flex items-center gap-1.5">
                       <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-thread-light-green)]" /> Light Green
                     </span>
                   </div>
@@ -602,7 +649,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
               <div className="bg-[var(--color-thread-cream)] p-6 rounded-2xl shadow-sm border border-black/10 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-[0.62rem] tracking-[0.12em] uppercase font-bold text-[#4B4130] bg-[#E5DCB8]/50 px-2 py-0.5 rounded-full">
+                    <span className="text-[0.62rem] tracking-[0.12em] uppercase font-medium text-[#4B4130] bg-[#E5DCB8]/50 px-2 py-0.5 rounded-full">
                       Warm Mid-tone
                     </span>
                     <span className="text-[0.65rem] font-mono text-amber-900/40">--color-thread-cream</span>
@@ -617,19 +664,19 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                 <div className="mt-4 pt-4 border-t border-black/10 space-y-2.5">
                   <div className="flex justify-between items-center text-[0.75rem]">
                     <span className="text-slate-500 font-medium">Headings</span>
-                    <span className="text-[var(--color-thread-heading)] font-semibold flex items-center gap-1.5">
+                    <span className="text-[var(--color-thread-heading)] font-medium flex items-center gap-1.5">
                       <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-thread-heading)]" /> Forest Green
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-[0.75rem]">
                     <span className="text-slate-500 font-medium">Body Description</span>
-                    <span className="text-slate-800 font-semibold flex items-center gap-1.5">
+                    <span className="text-slate-800 font-medium flex items-center gap-1.5">
                       <span className="w-2.5 h-2.5 rounded-full bg-slate-800" /> Slate 800
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-[0.75rem]">
                     <span className="text-slate-500 font-medium">Accents / Muted</span>
-                    <span className="text-slate-600 font-semibold flex items-center gap-1.5">
+                    <span className="text-slate-600 font-medium flex items-center gap-1.5">
                       <span className="w-2.5 h-2.5 rounded-full bg-slate-600" /> Slate 600
                     </span>
                   </div>
@@ -640,7 +687,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
               <div className="bg-[var(--color-thread-light-green)] p-6 rounded-tl-[24px] rounded-br-[28px] shadow-sm border border-[var(--color-thread-mid-green)]/10 flex flex-col justify-between">
                 <div>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-[0.62rem] tracking-[0.12em] uppercase font-bold text-[var(--color-thread-mid-green)] bg-white/60 px-2 py-0.5 rounded-full">
+                    <span className="text-[0.62rem] tracking-[0.12em] uppercase font-medium text-[var(--color-thread-mid-green)] bg-white/60 px-2 py-0.5 rounded-full">
                       Soft Highlight
                     </span>
                     <span className="text-[0.65rem] font-mono text-emerald-950/40">--color-thread-light-green</span>
@@ -655,20 +702,20 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                 <div className="mt-4 pt-4 border-t border-[var(--color-thread-mid-green)]/15 space-y-2.5">
                   <div className="flex justify-between items-center text-[0.75rem]">
                     <span className="text-emerald-950/60 font-medium">Headings</span>
-                    <span className="text-[var(--color-thread-heading)] font-semibold flex items-center gap-1.5">
+                    <span className="text-[var(--color-thread-heading)] font-medium flex items-center gap-1.5">
                       <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-thread-heading)]" /> Forest Green
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-[0.75rem]">
                     <span className="text-emerald-950/60 font-medium">Body Description</span>
-                    <span className="text-slate-700 font-semibold flex items-center gap-1.5">
+                    <span className="text-slate-700 font-medium flex items-center gap-1.5">
                       <span className="w-2.5 h-2.5 rounded-full bg-slate-700" /> Slate 700
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-[0.75rem]">
                     <span className="text-emerald-950/60 font-medium">Strong Accent</span>
-                    <span className="text-[var(--color-thread-mid-green)] font-semibold flex items-center gap-1.5">
-                      <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-thread-mid-green)]" /> Mid Green (#108560)
+                    <span className="text-[var(--color-thread-mid-green)] font-medium flex items-center gap-1.5">
+                      <span className="w-2.5 h-2.5 rounded-full bg-[var(--color-thread-mid-green)]" /> Mid Green
                     </span>
                   </div>
                 </div>
@@ -680,7 +727,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
             <div className="mt-8 p-6 sm:p-8 bg-slate-50 border border-black/5 rounded-2xl">
               <div className="flex items-center justify-between flex-wrap gap-4 mb-6">
                 <div>
-                  <span className="text-[0.68rem] tracking-[0.16em] uppercase text-[var(--color-thread-mid-green)] font-bold block">
+                  <span className="text-[0.68rem] tracking-[0.16em] uppercase text-[var(--color-thread-mid-green)] font-medium block">
                     Interactive Design System Customizer
                   </span>
                   <h3 className="text-[1.12rem] font-serif text-[var(--color-thread-heading)] font-normal mt-1">
@@ -689,7 +736,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                 </div>
                 <div className="flex gap-2">
                   <span className="text-[0.72rem] text-slate-500 font-medium">Global State Sync:</span>
-                  <span className="text-[0.72rem] bg-[var(--color-thread-light-green)] text-[var(--color-thread-heading)] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wide">
+                  <span className="text-[0.72rem] bg-[var(--color-thread-light-green)] text-[var(--color-thread-heading)] font-medium px-2.5 py-0.5 rounded-full uppercase tracking-wide">
                     Live Active Mode
                   </span>
                 </div>
@@ -703,16 +750,16 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {/* Theme Mood Selector */}
                 <div className="flex flex-col gap-2">
-                  <span className="text-[0.68rem] font-bold text-slate-400 uppercase tracking-wider">
+                  <span className="text-[0.68rem] font-medium text-slate-400 uppercase tracking-wider">
                     Primary Theme Mood
                   </span>
                   <div className="flex bg-white rounded-xl p-1 border border-black/5 shadow-xs">
                     <button
                       onClick={() => handleThemeChange("energetic")}
                       className={cn(
-                        "flex-1 text-center py-2 text-[0.8rem] font-semibold rounded-lg transition-all cursor-pointer",
+                        "flex-1 text-center py-2 text-[0.8rem] font-medium rounded-lg transition-all cursor-pointer",
                         theme === "energetic"
-                          ? "bg-[var(--color-thread-light-green)] text-[var(--color-thread-heading)] shadow-sm font-bold"
+                          ? "bg-[var(--color-thread-light-green)] text-[var(--color-thread-heading)] shadow-sm font-medium"
                           : "text-slate-500 hover:text-slate-900"
                       )}
                     >
@@ -721,9 +768,9 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                     <button
                       onClick={() => handleThemeChange("classic")}
                       className={cn(
-                        "flex-1 text-center py-2 text-[0.8rem] font-semibold rounded-lg transition-all cursor-pointer",
+                        "flex-1 text-center py-2 text-[0.8rem] font-medium rounded-lg transition-all cursor-pointer",
                         theme === "classic"
-                          ? "bg-[var(--color-thread-light-green)] text-[var(--color-thread-heading)] shadow-sm font-bold"
+                          ? "bg-[var(--color-thread-light-green)] text-[var(--color-thread-heading)] shadow-sm font-medium"
                           : "text-slate-500 hover:text-slate-900"
                       )}
                     >
@@ -734,16 +781,16 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
 
                 {/* Typography Font Selector */}
                 <div className="flex flex-col gap-2">
-                  <span className="text-[0.68rem] font-bold text-slate-400 uppercase tracking-wider">
+                  <span className="text-[0.68rem] font-medium text-slate-400 uppercase tracking-wider">
                     Serif Typography Font
                   </span>
                   <div className="flex bg-white rounded-xl p-1 border border-black/5 shadow-xs">
                     <button
                       onClick={() => handleFontChange("modern-serif")}
                       className={cn(
-                        "flex-1 text-center py-2 text-[0.8rem] font-semibold rounded-lg transition-all cursor-pointer",
+                        "flex-1 text-center py-2 text-[0.8rem] font-medium rounded-lg transition-all cursor-pointer",
                         font === "modern-serif"
-                          ? "bg-[var(--color-thread-light-green)] text-[var(--color-thread-heading)] shadow-sm font-bold"
+                          ? "bg-[var(--color-thread-light-green)] text-[var(--color-thread-heading)] shadow-sm font-medium"
                           : "text-slate-500 hover:text-slate-900"
                       )}
                     >
@@ -752,9 +799,9 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                     <button
                       onClick={() => handleFontChange("classic-serif")}
                       className={cn(
-                        "flex-1 text-center py-2 text-[0.8rem] font-semibold rounded-lg transition-all cursor-pointer",
+                        "flex-1 text-center py-2 text-[0.8rem] font-medium rounded-lg transition-all cursor-pointer",
                         font === "classic-serif"
-                          ? "bg-[var(--color-thread-light-green)] text-[var(--color-thread-heading)] shadow-sm font-bold"
+                          ? "bg-[var(--color-thread-light-green)] text-[var(--color-thread-heading)] shadow-sm font-medium"
                           : "text-slate-500 hover:text-slate-900"
                       )}
                     >
@@ -765,16 +812,16 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
 
                 {/* Primary Hero Cards Selector */}
                 <div className="flex flex-col gap-2">
-                  <span className="text-[0.68rem] font-bold text-slate-400 uppercase tracking-wider">
+                  <span className="text-[0.68rem] font-medium text-slate-400 uppercase tracking-wider">
                     Primary Hero Style
                   </span>
                   <div className="flex bg-white rounded-xl p-1 border border-black/5 shadow-xs">
                     <button
                       onClick={() => handleHeroStyleChange("white")}
                       className={cn(
-                        "flex-1 text-center py-2 text-[0.8rem] font-semibold rounded-lg transition-all cursor-pointer",
+                        "flex-1 text-center py-2 text-[0.8rem] font-medium rounded-lg transition-all cursor-pointer",
                         heroStyle === "white"
-                          ? "bg-[var(--color-thread-light-green)] text-[var(--color-thread-heading)] shadow-sm font-bold"
+                          ? "bg-[var(--color-thread-light-green)] text-[var(--color-thread-heading)] shadow-sm font-medium"
                           : "text-slate-500 hover:text-slate-900"
                       )}
                     >
@@ -783,9 +830,9 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                     <button
                       onClick={() => handleHeroStyleChange("green")}
                       className={cn(
-                        "flex-1 text-center py-2 text-[0.8rem] font-semibold rounded-lg transition-all cursor-pointer",
+                        "flex-1 text-center py-2 text-[0.8rem] font-medium rounded-lg transition-all cursor-pointer",
                         heroStyle === "green"
-                          ? "bg-[var(--color-thread-light-green)] text-[var(--color-thread-heading)] shadow-sm font-bold"
+                          ? "bg-[var(--color-thread-light-green)] text-[var(--color-thread-heading)] shadow-sm font-medium"
                           : "text-slate-500 hover:text-slate-900"
                       )}
                     >
@@ -796,16 +843,16 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
 
                 {/* Secondary Highlight Selector */}
                 <div className="flex flex-col gap-2">
-                  <span className="text-[0.68rem] font-bold text-slate-400 uppercase tracking-wider">
+                  <span className="text-[0.68rem] font-medium text-slate-400 uppercase tracking-wider">
                     Secondary Contrast
                   </span>
                   <div className="flex bg-white rounded-xl p-1 border border-black/5 shadow-xs">
                     <button
                       onClick={() => handleSecondaryStyleChange("light")}
                       className={cn(
-                        "flex-1 text-center py-2 text-[0.8rem] font-semibold rounded-lg transition-all cursor-pointer",
+                        "flex-1 text-center py-2 text-[0.8rem] font-medium rounded-lg transition-all cursor-pointer",
                         secondaryStyle === "light"
-                          ? "bg-[var(--color-thread-light-green)] text-[var(--color-thread-heading)] shadow-sm font-bold"
+                          ? "bg-[var(--color-thread-light-green)] text-[var(--color-thread-heading)] shadow-sm font-medium"
                           : "text-slate-500 hover:text-slate-900"
                       )}
                     >
@@ -814,9 +861,9 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                     <button
                       onClick={() => handleSecondaryStyleChange("dark")}
                       className={cn(
-                        "flex-1 text-center py-2 text-[0.8rem] font-semibold rounded-lg transition-all cursor-pointer",
+                        "flex-1 text-center py-2 text-[0.8rem] font-medium rounded-lg transition-all cursor-pointer",
                         secondaryStyle === "dark"
-                          ? "bg-[var(--color-thread-light-green)] text-[var(--color-thread-heading)] shadow-sm font-bold"
+                          ? "bg-[var(--color-thread-light-green)] text-[var(--color-thread-heading)] shadow-sm font-medium"
                           : "text-slate-500 hover:text-slate-900"
                       )}
                     >
@@ -833,7 +880,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                     <Palette className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-[0.66rem] uppercase tracking-wider font-bold text-slate-400 block">
+                    <span className="text-[0.66rem] uppercase tracking-wider font-medium text-slate-400 block">
                       Active Palette Variables
                     </span>
                     <span className="text-[0.8rem] font-medium text-slate-700">
@@ -844,15 +891,15 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                 <div className="flex items-center gap-2 flex-wrap">
                   <div className="flex items-center gap-1 bg-slate-100 rounded-lg px-2.5 py-1.5 border border-black/5">
                     <span className="w-3 h-3 rounded-full border border-black/5" style={{ backgroundColor: theme === "energetic" ? "#108560" : "#2A5B4A" }} />
-                    <span className="text-[0.7rem] font-mono text-slate-600 font-semibold uppercase">{theme === "energetic" ? "#108560" : "#2A5B4A"}</span>
+                    <span className="text-[0.7rem] font-mono text-slate-600 font-medium uppercase">{theme === "energetic" ? "#108560" : "#2A5B4A"}</span>
                   </div>
                   <div className="flex items-center gap-1 bg-slate-100 rounded-lg px-2.5 py-1.5 border border-black/5">
                     <span className="w-3 h-3 rounded-full border border-black/5" style={{ backgroundColor: theme === "energetic" ? "#E6F4ED" : "#E3EBE7" }} />
-                    <span className="text-[0.7rem] font-mono text-slate-600 font-semibold uppercase">{theme === "energetic" ? "#E6F4ED" : "#E3EBE7"}</span>
+                    <span className="text-[0.7rem] font-mono text-slate-600 font-medium uppercase">{theme === "energetic" ? "#E6F4ED" : "#E3EBE7"}</span>
                   </div>
                   <div className="flex items-center gap-1 bg-slate-100 rounded-lg px-2.5 py-1.5 border border-black/5">
                     <span className="w-3 h-3 rounded-full border border-black/5" style={{ backgroundColor: theme === "energetic" ? "#F5F7F6" : "#F5F5F5" }} />
-                    <span className="text-[0.7rem] font-mono text-slate-600 font-semibold uppercase">{theme === "energetic" ? "#F5F7F6" : "#F5F5F5"}</span>
+                    <span className="text-[0.7rem] font-mono text-slate-600 font-medium uppercase">{theme === "energetic" ? "#F5F7F6" : "#F5F5F5"}</span>
                   </div>
                 </div>
               </div>
@@ -880,7 +927,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
             {fonts.map((f, i) => (
               <div key={f.family} className={`pt-12 first:pt-0 flex flex-col lg:flex-row gap-8`}>
                 <div className="w-full lg:w-[320px] flex-shrink-0">
-                  <h3 className="font-bold text-[1rem] text-slate-900 leading-tight">
+                  <h3 className="font-medium text-[1rem] text-slate-900 leading-tight">
                     {f.family}
                   </h3>
                   <p className="text-[0.82rem] text-slate-500 mt-2.5 leading-relaxed">
@@ -889,21 +936,21 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                   
                   <div className="mt-5 grid grid-cols-2 gap-y-3 gap-x-4">
                     <div className="space-y-1">
-                      <span className="block text-[0.62rem] uppercase tracking-wider text-slate-400 font-bold">Size</span>
+                      <span className="block text-[0.62rem] uppercase tracking-wider text-slate-400 font-medium">Size</span>
                       <span className="block text-[0.78rem] text-slate-700 font-mono">{(f as any).size}</span>
                     </div>
                     <div className="space-y-1">
-                      <span className="block text-[0.62rem] uppercase tracking-wider text-slate-400 font-bold">Line Height</span>
+                      <span className="block text-[0.62rem] uppercase tracking-wider text-slate-400 font-medium">Line Height</span>
                       <span className="block text-[0.78rem] text-slate-700 font-mono">{(f as any).lineHeight}</span>
                     </div>
                     <div className="space-y-1">
-                      <span className="block text-[0.62rem] uppercase tracking-wider text-slate-400 font-bold">Weight</span>
+                      <span className="block text-[0.62rem] uppercase tracking-wider text-slate-400 font-medium">Weight</span>
                       <span className="block text-[0.78rem] text-slate-700 font-mono">{(f as any).weight}</span>
                     </div>
                     <div className="space-y-1 flex flex-col justify-end">
                       <button
                         onClick={() => handleCopy(f.classes, f.family)}
-                        className="text-[0.65rem] bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold px-2 py-1 rounded inline-flex items-center gap-1.5 w-fit"
+                        className="text-[0.65rem] bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium px-2 py-1 rounded inline-flex items-center gap-1.5 w-fit"
                       >
                         {copiedText === f.family ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3 h-3" />}
                         Copy class
@@ -935,10 +982,10 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
               {/* Serif Weights Comparison */}
               <div className="bg-[var(--color-thread-off-white)] p-6 rounded-2xl border border-black/5">
                 <div className="flex items-center justify-between mb-4.5 border-b border-black/5 pb-3">
-                  <span className="text-[0.68rem] tracking-[0.1em] uppercase font-bold text-slate-700">
-                    Fraunces (Serif Style Family)
+                  <span className="text-[0.68rem] tracking-[0.1em] uppercase font-medium text-slate-700">
+                    {font === 'modern-serif' ? 'Fraunces' : 'Frank Ruhl Libre'} (Serif Style Family)
                   </span>
-                  <span className="text-[0.7rem] bg-emerald-50 text-[var(--color-thread-mid-green)] font-semibold px-2 py-0.5 rounded animate-pulse">
+                  <span className="text-[0.7rem] bg-emerald-50 text-[var(--color-thread-mid-green)] font-medium px-2 py-0.5 rounded animate-pulse">
                     Clinical Elegant
                   </span>
                 </div>
@@ -963,36 +1010,16 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                       <span className="text-[0.7rem] text-slate-400 font-mono">font-serif font-medium (500)</span>
                     </div>
                   </div>
-
-                  <div className="flex items-start gap-4 border-t border-black/5 pt-4">
-                    <span className="w-16 font-mono text-[0.7rem] text-slate-400 mt-1 uppercase">Bold</span>
-                    <div>
-                      <div className="font-serif font-bold text-[1.6rem] leading-tight text-slate-950">
-                        Humanized Growth Plans
-                      </div>
-                      <span className="text-[0.7rem] text-slate-400 font-mono">font-serif font-bold (700)</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-4 border-t border-black/5 pt-4">
-                    <span className="w-16 font-mono text-[0.7rem] text-slate-400 mt-1 uppercase">Black</span>
-                    <div>
-                      <div className="font-serif font-black text-[1.6rem] leading-tight text-slate-950">
-                        Humanized Growth Plans
-                      </div>
-                      <span className="text-[0.7rem] text-slate-400 font-mono">font-serif font-black (900)</span>
-                    </div>
-                  </div>
                 </div>
               </div>
 
               {/* Sans-Serif Weights Comparison */}
               <div className="bg-[var(--color-thread-off-white)] p-6 rounded-2xl border border-black/5">
                 <div className="flex items-center justify-between mb-4.5 border-b border-black/5 pb-3">
-                  <span className="text-[0.68rem] tracking-[0.1em] uppercase font-bold text-slate-700">
+                  <span className="text-[0.68rem] tracking-[0.1em] uppercase font-medium text-slate-700">
                     Inter (Sans-Serif Style Family)
                   </span>
-                  <span className="text-[0.7rem] bg-slate-100 text-slate-700 font-semibold px-2 py-0.5 rounded">
+                  <span className="text-[0.7rem] bg-slate-100 text-slate-700 font-medium px-2 py-0.5 rounded">
                     Neutral High-Legibility
                   </span>
                 </div>
@@ -1017,29 +1044,173 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                       <span className="text-[0.7rem] text-slate-400 font-mono">font-sans font-medium (500)</span>
                     </div>
                   </div>
+                </div>
+              </div>
 
-                  <div className="flex items-start gap-4 border-t border-black/5 pt-4">
-                    <span className="w-16 font-mono text-[0.7rem] text-slate-400 mt-1 uppercase">Semibold</span>
-                    <div>
-                      <div className="font-sans font-semibold text-[1.3rem] leading-tight text-slate-950 tracking-tight">
-                        Support Strategies & Focus Tracker
-                      </div>
-                      <span className="text-[0.7rem] text-slate-400 font-mono">font-sans font-semibold (600)</span>
-                    </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Architecture & State Management Section */}
+        <section className="bg-white rounded-tr-[36px] p-10 border border-black/5 shadow-sm">
+          <div className="flex items-center gap-3.5 mb-8">
+            <div className="w-10 h-10 rounded-full bg-[var(--color-thread-light-green)] flex items-center justify-center text-[var(--color-thread-mid-green)]">
+              <Database className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-[1.5rem] font-serif font-normal text-[var(--color-thread-heading)]">
+                State & Architecture
+              </h2>
+              <p className="text-slate-500 text-[0.88rem] mt-0.5">
+                Centralized global state management and context providers ensuring data consistency across children profiles and clinical lockers.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* ChildContext Overview */}
+            <div className="p-6 bg-slate-50 rounded-2xl border border-black/5">
+              <div className="flex items-center gap-3 mb-4">
+                <Users className="w-5 h-5 text-[var(--color-thread-mid-green)]" />
+                <h3 className="font-sans font-medium text-[1rem] text-slate-900">ChildContext (ChildProvider)</h3>
+              </div>
+              <p className="text-[0.84rem] text-slate-600 leading-relaxed mb-4">
+                Manages the active child profile, the full children registry, and profile addition workflows. Accessible via the <code className="text-[0.7rem] bg-black/5 px-1 rounded font-mono">useCurrentChild()</code> hook.
+              </p>
+              <div className="space-y-2">
+                <div className="flex justify-between text-[0.72rem] font-mono text-slate-400 border-b border-black/5 pb-1">
+                  <span>State Key</span>
+                  <span>Description</span>
+                </div>
+                <div className="flex justify-between text-[0.72rem] text-slate-500">
+                  <span className="font-medium text-slate-700">currentChild</span>
+                  <span>Active child profile object</span>
+                </div>
+                <div className="flex justify-between text-[0.72rem] text-slate-500">
+                  <span className="font-medium text-slate-700">childrenList</span>
+                  <span>Array of all registered children</span>
+                </div>
+              </div>
+            </div>
+
+            {/* LockerContext Overview */}
+            <div className="p-6 bg-slate-50 rounded-2xl border border-black/5">
+              <div className="flex items-center gap-3 mb-4">
+                <Lock className="w-5 h-5 text-[var(--color-thread-mid-green)]" />
+                <h3 className="font-sans font-medium text-[1rem] text-slate-900">LockerContext (LockerProvider)</h3>
+              </div>
+              <p className="text-[0.84rem] text-slate-600 leading-relaxed mb-4">
+                Handles clinical documentation, assessment uploads, and shared access states. Supports global search and filtering across the clinical repository.
+              </p>
+              <div className="space-y-2">
+                <div className="flex justify-between text-[0.72rem] font-mono text-slate-400 border-b border-black/5 pb-1">
+                  <span>Method</span>
+                  <span>Functionality</span>
+                </div>
+                <div className="flex justify-between text-[0.72rem] text-slate-500">
+                  <span className="font-medium text-slate-700">setFilter()</span>
+                  <span>Category-based filtering</span>
+                </div>
+                <div className="flex justify-between text-[0.72rem] text-slate-500">
+                  <span className="font-medium text-slate-700">toggleShare()</span>
+                  <span>Toggle file visibility with care circle</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Global Layout & Grid Section */}
+        <section className="bg-white rounded-xl p-10 border border-black/5 shadow-sm">
+          <div className="flex items-center gap-3.5 mb-8">
+            <div className="w-10 h-10 rounded-full bg-[var(--color-thread-light-green)] flex items-center justify-center text-[var(--color-thread-mid-green)]">
+              <Layout className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-[1.5rem] font-serif font-normal text-[var(--color-thread-heading)]">
+                Global Layout & Grid
+              </h2>
+              <p className="text-slate-500 text-[0.88rem] mt-0.5">
+                The structural foundation ensuring consistent spacing, alignment, and responsiveness across the clinical platform.
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Grid Column 1: Shell Components */}
+            <div className="md:col-span-2 space-y-6">
+              <div className="p-6 bg-slate-50 rounded-2xl border border-black/5">
+                <div className="flex items-center gap-3 mb-4">
+                  <Columns className="w-5 h-5 text-[var(--color-thread-mid-green)]" />
+                  <h3 className="font-sans font-medium text-[1rem] text-slate-900">Application Shell (DashboardLayout)</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <p className="text-[0.78rem] font-medium text-slate-700">Sidebar Rail</p>
+                    <p className="text-[0.72rem] text-slate-500 leading-relaxed">
+                      A fixed 280px left-anchored navigation component providing high-level routing across diagnosis, roadmap, and locker.
+                    </p>
                   </div>
-
-                  <div className="flex items-start gap-4 border-t border-black/5 pt-4">
-                    <span className="w-16 font-mono text-[0.7rem] text-slate-400 mt-1 uppercase">Bold</span>
-                    <div>
-                      <div className="font-sans font-bold text-[1.3rem] leading-tight text-slate-950 tracking-tight">
-                        Support Strategies & Focus Tracker
-                      </div>
-                      <span className="text-[0.7rem] text-slate-400 font-mono">font-sans font-bold (700)</span>
-                    </div>
+                  <div className="space-y-2">
+                    <p className="text-[0.78rem] font-medium text-slate-700">Action TopBar</p>
+                    <p className="text-[0.72rem] text-slate-500 leading-relaxed">
+                      A 72px fixed header containing the child profile switcher, global notifications, and primary user actions.
+                    </p>
                   </div>
                 </div>
               </div>
 
+              <div className="p-6 bg-white rounded-2xl border border-dashed border-slate-200">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <Maximize className="w-5 h-5 text-slate-400" />
+                    <h3 className="font-sans font-medium text-[1rem] text-slate-900">Content Grid & Containers</h3>
+                  </div>
+                  <Badge variant="active" className="text-[0.65rem]">Max-W 5XL</Badge>
+                </div>
+                <p className="text-[0.84rem] text-slate-600 mb-6">
+                  Standardized content containment using the <code className="bg-slate-100 px-1 rounded text-[0.7rem] font-mono">PageContainer</code> component.
+                </p>
+                <div className="grid grid-cols-12 gap-2 h-24">
+                  {[...Array(12)].map((_, i) => (
+                    <div key={i} className="bg-[var(--color-thread-light-green)] opacity-30 rounded h-full flex items-center justify-center font-mono text-[0.6rem] text-[var(--color-thread-mid-green)]">
+                      {i + 1}
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-between mt-3 text-[0.65rem] font-mono text-slate-400">
+                  <span>Fluid Padding (px-6)</span>
+                  <span>Responsive Scaling (sm:px-8 md:px-12)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Grid Column 2: Spacing Rules */}
+            <div className="p-6 bg-[var(--color-thread-off-white)] rounded-2xl border border-black/5">
+              <h3 className="font-sans font-medium text-[1rem] text-slate-900 mb-4">Spacing Standards</h3>
+              <ul className="space-y-4">
+                <li className="flex gap-3">
+                  <div className="w-1.5 h-10 bg-slate-300 rounded-full" />
+                  <div>
+                    <p className="text-[0.78rem] font-medium text-slate-800">Section Gaps</p>
+                    <p className="text-[0.7rem] text-slate-500">40px (10 units) between major logical sections.</p>
+                  </div>
+                </li>
+                <li className="flex gap-3">
+                  <div className="w-1.5 h-6 bg-slate-300 rounded-full" />
+                  <div>
+                    <p className="text-[0.78rem] font-medium text-slate-800">Element Stacking</p>
+                    <p className="text-[0.7rem] text-slate-500">24px (6 units) between related elements.</p>
+                  </div>
+                </li>
+                <li className="flex gap-3">
+                  <div className="w-1.5 h-4 bg-slate-300 rounded-full" />
+                  <div>
+                    <p className="text-[0.78rem] font-medium text-slate-800">Atomic Spacing</p>
+                    <p className="text-[0.7rem] text-slate-500">8px-12px for internal component padding.</p>
+                  </div>
+                </li>
+              </ul>
             </div>
           </div>
         </section>
@@ -1064,11 +1235,11 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
             <div className="space-y-6">
               {shapes.map((s) => (
                 <div key={s.name} className="flex gap-4 p-4 border border-black/5 rounded-xl hover:bg-slate-50 transition-colors">
-                  <div className="w-11 h-11 bg-emerald-50 text-[var(--color-thread-mid-green)] font-mono text-[0.75rem] flex items-center justify-center font-bold border border-emerald-100/30 rounded-lg">
+                  <div className="w-11 h-11 bg-emerald-50 text-[var(--color-thread-mid-green)] font-mono text-[0.75rem] flex items-center justify-center font-medium border border-emerald-100/30 rounded-lg">
                     C3
                   </div>
                   <div>
-                    <h4 className="font-semibold text-[0.9rem] text-slate-900">{s.name}</h4>
+                    <h4 className="font-medium text-[0.9rem] text-slate-900">{s.name}</h4>
                     <code className="text-[0.72rem] text-[var(--color-thread-mid-green)] bg-[var(--color-thread-light-green)] px-1.5 py-0.5 rounded font-mono mt-1 inline-block">
                       {s.class}
                     </code>
@@ -1081,7 +1252,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
             {/* Custom Background Showcase */}
             <div className="bg-[var(--color-thread-off-white)] border border-black/5 rounded-2xl p-6.5 flex flex-col justify-between">
               <div>
-                <span className="text-[0.66rem] tracking-[0.16em] uppercase text-[var(--color-thread-mid-green)] font-bold mb-2.5 block">
+                <span className="text-[0.66rem] tracking-[0.16em] uppercase text-[var(--color-thread-mid-green)] font-medium mb-2.5 block">
                   Watercolor Texture Accent
                 </span>
                 <p className="text-[0.86rem] text-slate-600 leading-relaxed mb-6">
@@ -1091,7 +1262,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
 
               {/* Visualized block */}
               <div className="w-full h-[120px] rounded-xl bg-watercolor flex items-center justify-center">
-                <span className="bg-white/90 backdrop-blur-md border border-neutral-200/50 rounded-full px-5 py-2 text-[0.82rem] font-semibold tracking-wide shadow-sm text-slate-800">
+                <span className="bg-white/90 backdrop-blur-md border border-neutral-200/50 rounded-full px-5 py-2 text-[0.82rem] font-medium tracking-wide shadow-sm text-slate-800">
                   bg-watercolor utility styled
                 </span>
               </div>
@@ -1151,7 +1322,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                           const targetPage = navigationMap[btn.variant];
                           if (targetPage) onPageChange(targetPage as any);
                         }}
-                        className="cursor-pointer select-none hover:scale-102 transform active:scale-98 transition-all px-5 py-2.5 text-[0.8rem] font-bold whitespace-nowrap inline-flex shadow-sm"
+                        className="cursor-pointer select-none hover:scale-102 transform active:scale-98 transition-all px-5 py-2.5 text-[0.8rem] font-medium whitespace-nowrap inline-flex shadow-sm"
                       >
                         {btn.sampleText}
                       </Button>
@@ -1162,7 +1333,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                   <div className="p-6 flex flex-col justify-between flex-1 bg-white">
                     <div>
                       <div className="flex items-center justify-between gap-2 mb-2">
-                        <span className="text-[0.66rem] uppercase tracking-wider font-bold text-[var(--color-thread-mid-green)] bg-[var(--color-thread-light-green)] px-2.5 py-1 rounded-md">
+                        <span className="text-[0.66rem] uppercase tracking-wider font-medium text-[var(--color-thread-mid-green)] bg-[var(--color-thread-light-green)] px-2.5 py-1 rounded-md">
                           variant="{btn.variant}"
                         </span>
                         <span className="text-[0.64rem] text-slate-400 font-mono">BTN-{btn.variant.toUpperCase()}</span>
@@ -1176,7 +1347,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
 
                       {/* Codebase location mapping */}
                       <div className="mb-4">
-                        <div className="text-[0.66rem] uppercase tracking-wider font-bold text-slate-400 mb-1.5">Codebase Integration Map</div>
+                        <div className="text-[0.66rem] uppercase tracking-wider font-medium text-slate-400 mb-1.5">Codebase Integration Map</div>
                         <div className="flex flex-wrap gap-1">
                           {btn.whereUsed.split(', ').map((loc) => (
                             <span key={loc} className="text-[0.64rem] font-mono font-medium text-slate-600 bg-slate-100 border border-black/5 px-2 py-0.5 rounded">
@@ -1190,10 +1361,10 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                     {/* Class spec sheet */}
                     <div className="border-t border-black/5 pt-4 mt-auto">
                       <div className="flex items-center justify-between gap-4 mb-2">
-                        <span className="text-[0.66rem] uppercase tracking-wider font-bold text-slate-400">Tailwind Design Classes</span>
+                        <span className="text-[0.66rem] uppercase tracking-wider font-medium text-slate-400">Tailwind Design Classes</span>
                         <button
                           onClick={() => handleCopy(btn.classCode, btn.name)}
-                          className="text-[0.7rem] font-bold text-[var(--color-thread-mid-green)] hover:opacity-80 transition-all flex items-center gap-1 cursor-pointer"
+                          className="text-[0.7rem] font-medium text-[var(--color-thread-mid-green)] hover:opacity-80 transition-all flex items-center gap-1 cursor-pointer"
                         >
                           {copiedText === btn.name ? (
                             <span className="flex items-center gap-1 text-emerald-600"><Check className="w-3 h-3" /> Classes Copied</span>
@@ -1212,7 +1383,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
             </div>
 
             <div className="bg-[var(--color-thread-light-green)]/35 rounded-2xl p-5 border border-[var(--color-thread-mid-green)]/15 text-[0.82rem] text-slate-700 leading-relaxed font-sans">
-              <strong className="text-[var(--color-thread-heading)] font-semibold block mb-0.5">Component Integration Checklist</strong>
+              <strong className="text-[var(--color-thread-heading)] font-medium block mb-0.5">Component Integration Checklist</strong>
               Fully unified button mapping allows seamless navigation and state flow testing. These exact variants render reliably within settings drawers, priority tables, dialog sheets, and diagnostic dashboards.
             </div>
           </div>
@@ -1258,7 +1429,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                         <Card hoverable className="w-full max-w-[340px]">
                           <CardHeader>
                             <div className="flex justify-between items-center mb-1">
-                              <span className="text-[0.62rem] tracking-wider uppercase font-bold text-slate-400">CareTeam Node</span>
+                              <span className="text-[0.62rem] tracking-wider uppercase font-medium text-slate-400">CareTeam Node</span>
                               <span 
                                 onClick={() => {
                                   const nextStatus = genericCardStatus === 'active' ? 'completed' : 'active';
@@ -1266,7 +1437,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                                   addLog(`Generic Card: Simulated clinician session state toggled to '${nextStatus}'`);
                                 }}
                                 className={cn(
-                                  "text-[0.64rem] px-2.5 py-0.5 rounded-full font-bold cursor-pointer transition-colors",
+                                  "text-[0.64rem] px-2.5 py-0.5 rounded-full font-medium cursor-pointer transition-colors",
                                   genericCardStatus === 'active' 
                                     ? 'bg-emerald-100 text-emerald-800 animate-pulse' 
                                     : 'bg-slate-100 text-slate-600'
@@ -1284,10 +1455,10 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                               Initial diagnostics mapping phoneme markers and alveolar fricatives.
                             </p>
                             <div className="flex items-center justify-between mt-4 pt-3 border-t border-[var(--color-thread-light-gray)]/50">
-                              <div className="text-[0.74rem] text-slate-400 font-semibold">SLP: Dr. C. Chen</div>
+                              <div className="text-[0.74rem] text-slate-400 font-medium">SLP: Dr. C. Chen</div>
                               <button 
                                 onClick={() => addLog("Generic Card CTA: Selected 'Review Diagnostics' channel.")}
-                                className="text-[0.78rem] font-bold text-[var(--color-thread-mid-green)] hover:opacity-80 transition-opacity cursor-pointer inline-flex items-center gap-1"
+                                className="text-[0.78rem] font-medium text-[var(--color-thread-mid-green)] hover:opacity-80 transition-opacity cursor-pointer inline-flex items-center gap-1"
                               >
                                 Review Diagnostics &rarr;
                               </button>
@@ -1315,17 +1486,17 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                             Frustration around homework cycles gets real. Tackling attention first does double duty.
                           </p>
                           <div className="bg-[var(--color-thread-off-white)] rounded-[20px] px-5 py-4 mb-4 relative">
-                            <span className="text-[0.72rem] tracking-[0.1em] uppercase text-[var(--color-thread-mid-green)] font-bold mb-2 block">
+                            <span className="text-[0.72rem] tracking-[0.1em] uppercase text-[var(--color-thread-mid-green)] font-medium mb-2 block">
                               Why it ranks here
                             </span>
                             <div className="space-y-0 text-[0.82rem]">
                               <div className="flex justify-between border-b border-black/5 py-1.5">
                                 <span className="text-slate-500">Functional impact</span>
-                                <span className="font-semibold text-slate-700">Moderate</span>
+                                <span className="font-medium text-slate-700">Moderate</span>
                               </div>
                               <div className="flex justify-between pt-1.5">
                                 <span className="text-slate-500">Family burden</span>
-                                <span className="font-semibold text-slate-700">High</span>
+                                <span className="font-medium text-slate-700">High</span>
                               </div>
                             </div>
                           </div>
@@ -1342,7 +1513,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                             <div className="w-[34px] h-[34px] rounded-[9px] bg-[var(--color-thread-light-green)] text-[var(--color-thread-mid-green)] flex items-center justify-center flex-shrink-0">
                               <Activity className="w-4.5 h-4.5 stroke-[1.8]" />
                             </div>
-                            <h3 className="text-[1.05rem] font-semibold tracking-tight text-slate-800 font-sans">
+                            <h3 className="text-[1.05rem] font-medium tracking-tight text-slate-800 font-sans">
                               At school
                             </h3>
                           </div>
@@ -1372,7 +1543,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                           <div className="w-[44px] h-[44px] rounded-[13px] bg-[var(--color-thread-light-green)] flex items-center justify-center text-[var(--color-thread-mid-green)] mb-4">
                             <Star className="w-[18px] h-[18px] stroke-[1.8] fill-emerald-100" />
                           </div>
-                          <h3 className="text-[1.16rem] font-semibold tracking-tight text-[var(--color-thread-heading)] mb-2 leading-tight font-sans">
+                          <h3 className="text-[1.16rem] font-medium tracking-tight text-[var(--color-thread-heading)] mb-2 leading-tight font-sans">
                             Creative Play
                           </h3>
                           <p className="text-[0.88rem] text-slate-550 leading-relaxed font-sans">
@@ -1402,14 +1573,14 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                             <circle cx="100" cy="100" r="98" fill="none" stroke={valueCardForest ? "white" : "black"} strokeOpacity={valueCardForest ? "1" : "0.2"} strokeWidth="1" />
                           </svg>
                           <div className="relative">
-                            <h3 className="text-[1.12rem] font-semibold tracking-tight mb-1.5 relative font-sans">
+                            <h3 className="text-[1.12rem] font-medium tracking-tight mb-1.5 relative font-sans">
                               Evidence &rArr; Formulation
                             </h3>
                             <p className={cn("text-[0.86rem] leading-relaxed relative", valueCardForest ? "text-white/85" : "text-slate-650 font-sans")}>
                               Every clinique is traced back to its source and confirmed with certified reviewers.
                             </p>
                           </div>
-                          <span className="text-[0.66rem] font-mono tracking-wider opacity-65 font-bold block">
+                          <span className="text-[0.66rem] font-mono tracking-wider opacity-65 font-medium block">
                             Click to Swap Style View &rarr;
                           </span>
                         </div>
@@ -1421,8 +1592,8 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                             <div className="absolute inset-0 bg-gradient-to-tr from-[var(--color-thread-light-green)]/70 to-[var(--color-thread-cream)]/40 z-[1]" />
                           </div>
                           <div className="p-5 flex flex-col flex-1">
-                            <span className="text-[0.58rem] tracking-[0.14em] uppercase text-[var(--color-thread-muted-green)] font-bold mb-2 font-sans">Parent Methods</span>
-                            <h3 className="text-[1.12rem] font-semibold tracking-tight leading-tight mb-1 text-slate-900 font-serif">
+                            <span className="text-[0.58rem] tracking-[0.14em] uppercase text-[var(--color-thread-muted-green)] font-medium mb-2 font-sans">Parent Methods</span>
+                            <h3 className="text-[1.12rem] font-medium tracking-tight leading-tight mb-1 text-slate-900 font-serif">
                               Interactive Vocalization Timing
                             </h3>
                             <p className="text-[0.84rem] text-slate-500 leading-relaxed font-sans">
@@ -1451,7 +1622,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                             action={
                               <button 
                                 onClick={() => addLog("Synthesis Card Clinician Open Insights triggered.")}
-                                className="bg-white text-[var(--color-thread-dark-forest)] font-semibold text-[0.82rem] px-4 py-2 rounded-full hover:bg-slate-50 transition-all font-sans cursor-pointer shadow-xs inline-flex items-center gap-1"
+                                className="bg-white text-[var(--color-thread-dark-forest)] font-medium text-[0.82rem] px-4 py-2 rounded-full hover:bg-slate-50 transition-all font-sans cursor-pointer shadow-xs inline-flex items-center gap-1"
                               >
                                 Open Insights <ChevronRight className="w-3.5 h-3.5 stroke-[2]" />
                               </button>
@@ -1477,7 +1648,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                   <div className="p-8 flex flex-col justify-between lg:w-[55%] bg-white">
                     <div>
                       <div className="flex items-center gap-2 mb-3.5">
-                        <span className="text-[0.66rem] uppercase tracking-wider font-bold text-[var(--color-thread-mid-green)] bg-[var(--color-thread-light-green)] px-2.5 py-1 rounded-md">
+                        <span className="text-[0.66rem] uppercase tracking-wider font-medium text-[var(--color-thread-mid-green)] bg-[var(--color-thread-light-green)] px-2.5 py-1 rounded-md">
                           {card.type}
                         </span>
                       </div>
@@ -1490,7 +1661,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
 
                       {/* Codebase location mapping */}
                       <div className="mb-6">
-                        <div className="text-[0.66rem] uppercase tracking-wider font-bold text-slate-400 mb-2.5">Codebase Integration Map</div>
+                        <div className="text-[0.66rem] uppercase tracking-wider font-medium text-slate-400 mb-2.5">Codebase Integration Map</div>
                         <div className="flex flex-wrap gap-1.5">
                           {card.whereUsed.split(', ').map((loc) => (
                             <span key={loc} className="text-[0.68rem] font-mono font-medium text-slate-600 bg-slate-100 border border-black/5 px-2.5 py-1 rounded-md">
@@ -1504,10 +1675,10 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                     {/* Class spec sheet */}
                     <div className="border-t border-black/5 pt-5 mt-auto">
                       <div className="flex items-center justify-between gap-4 mb-2.5">
-                        <span className="text-[0.66rem] uppercase tracking-wider font-bold text-slate-400">Tailwind Design Classes</span>
+                        <span className="text-[0.66rem] uppercase tracking-wider font-medium text-slate-400">Tailwind Design Classes</span>
                         <button
                           onClick={() => handleCopy(card.classCode, card.name)}
-                          className="text-[0.74rem] font-bold text-[var(--color-thread-mid-green)] hover:opacity-80 transition-all flex items-center gap-1 cursor-pointer"
+                          className="text-[0.74rem] font-medium text-[var(--color-thread-mid-green)] hover:opacity-80 transition-all flex items-center gap-1 cursor-pointer"
                         >
                           {copiedText === card.name ? (
                             <span className="flex items-center gap-1 text-emerald-600"><Check className="w-3 h-3" /> Classes Copied</span>
@@ -1526,8 +1697,8 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
             </div>
 
             <div className="bg-[var(--color-thread-cream)] text-[var(--color-thread-darkest)] rounded-2xl p-5 border border-black/5 text-[0.82rem] leading-relaxed font-sans mt-2">
-              <strong className="text-[var(--color-thread-heading)] font-semibold block mb-0.5">Card Curvature Guidelines</strong>
-              Consistent corner presets help establish proper content hierarchy. Standardized wrapper modules employ symmetric <code className="text-xs bg-black/5 px-1 rounded font-mono font-bold">rounded-2xl</code> curves to preserve clean, nested interfaces, while premium landing segments leverage dynamic asymmetric strokes.
+              <strong className="text-[var(--color-thread-heading)] font-medium block mb-0.5">Card Curvature Guidelines</strong>
+              Consistent corner presets help establish proper content hierarchy. Standardized wrapper modules employ symmetric <code className="text-xs bg-black/5 px-1 rounded font-mono font-medium">rounded-2xl</code> curves to preserve clean, nested interfaces, while premium landing segments leverage dynamic asymmetric strokes.
             </div>
           </div>
         </section>
@@ -1552,7 +1723,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
             {/* Component 1: AreaItem */}
             <div className="border-b border-black/5 pb-8">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-sans font-semibold text-[1.12rem] text-slate-900">1. Area Status Item (AreaItem)</h3>
+                <h3 className="font-sans font-medium text-[1.12rem] text-slate-900">1. Area Status Item (AreaItem)</h3>
                 <span className="font-mono text-xs text-slate-400">src/components/ui/AreaItem.tsx</span>
               </div>
               <p className="text-slate-500 text-[0.88rem] mb-6">
@@ -1577,7 +1748,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
             {/* Component 2: TimelineItem */}
             <div className="border-b border-black/5 pb-8">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-sans font-semibold text-[1.12rem] text-slate-900">2. Roadmap / Priority Timeline (TimelineItem)</h3>
+                <h3 className="font-sans font-medium text-[1.12rem] text-slate-900">2. Roadmap / Priority Timeline (TimelineItem)</h3>
                 <span className="font-mono text-xs text-slate-400">src/components/ui/TimelineItem.tsx</span>
               </div>
               <p className="text-slate-500 text-[0.88rem] mb-6">
@@ -1585,7 +1756,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
               </p>
               <div className="space-y-6">
                 <div className="p-4 bg-slate-50 rounded-xl border border-black/5">
-                  <span className="text-[0.68rem] font-bold text-slate-400 block mb-3 uppercase">Collapsible Accordion View (Dashboard)</span>
+                  <span className="text-[0.68rem] font-medium text-slate-400 block mb-3 uppercase">Collapsible Accordion View (Dashboard)</span>
                   <TimelineItem
                     tag="Now"
                     title="Classroom attention"
@@ -1597,7 +1768,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                   />
                 </div>
                 <div className="p-4 bg-slate-50 rounded-xl border border-black/5">
-                  <span className="text-[0.68rem] font-bold text-slate-400 block mb-3 uppercase">Static/Always-Expanded View with Clinical Weighting (Priorities)</span>
+                  <span className="text-[0.68rem] font-medium text-slate-400 block mb-3 uppercase">Static/Always-Expanded View with Clinical Weighting (Priorities)</span>
                   <TimelineItem
                     tag="Next"
                     title="Emotional regulation at home"
@@ -1619,7 +1790,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
             {/* Component 3: Clinical Weighting */}
             <div className="border-b border-black/5 pb-8">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-sans font-semibold text-[1.12rem] text-slate-900">3. Clinical Weighting (ClinicalWeighting)</h3>
+                <h3 className="font-sans font-medium text-[1.12rem] text-slate-900">3. Clinical Weighting (ClinicalWeighting)</h3>
                 <span className="font-mono text-xs text-slate-400">src/components/ui/ClinicalWeighting.tsx</span>
               </div>
               <p className="text-slate-500 text-[0.88rem] mb-6">
@@ -1640,7 +1811,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
             {/* Component 4: Evidence Badge & Meter */}
             <div className="border-b border-black/5 pb-8">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-sans font-semibold text-[1.12rem] text-slate-900">4. Evidence Badge & Meter (EvidenceBadge / EvidenceMeter)</h3>
+                <h3 className="font-sans font-medium text-[1.12rem] text-slate-900">4. Evidence Badge & Meter (EvidenceBadge / EvidenceMeter)</h3>
                 <span className="font-mono text-xs text-slate-400">src/components/ui/EvidenceBadge.tsx</span>
               </div>
               <p className="text-slate-500 text-[0.88rem] mb-6">
@@ -1648,15 +1819,15 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
               </p>
               <div className="flex flex-wrap gap-6 items-center">
                 <div className="p-4 bg-slate-50 rounded-xl border border-black/5 flex items-center gap-4">
-                  <span className="text-[0.66rem] font-bold text-slate-400 uppercase">Level 3 (Strong):</span>
+                  <span className="text-[0.66rem] font-medium text-slate-400 uppercase">Level 3 (Strong):</span>
                   <EvidenceBadge level={3} />
                 </div>
                 <div className="p-4 bg-slate-50 rounded-xl border border-black/5 flex items-center gap-4">
-                  <span className="text-[0.66rem] font-bold text-slate-400 uppercase">Level 2 (Moderate):</span>
+                  <span className="text-[0.66rem] font-medium text-slate-400 uppercase">Level 2 (Moderate):</span>
                   <EvidenceBadge level={2} />
                 </div>
                 <div className="p-4 bg-slate-50 rounded-xl border border-black/5 flex items-center gap-4">
-                  <span className="text-[0.66rem] font-bold text-slate-400 uppercase">Level 1 (Emerging):</span>
+                  <span className="text-[0.66rem] font-medium text-slate-400 uppercase">Level 1 (Emerging):</span>
                   <EvidenceBadge level={1} />
                 </div>
               </div>
@@ -1665,7 +1836,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
             {/* Component 5: Clinical Insight Card */}
             <div className="border-b border-black/5 pb-8">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-sans font-semibold text-[1.12rem] text-slate-900">5. Clinical Insight Card (InsightCard)</h3>
+                <h3 className="font-sans font-medium text-[1.12rem] text-slate-900">5. Clinical Insight Card (InsightCard)</h3>
                 <span className="font-mono text-xs text-slate-400">src/components/ui/InsightCard.tsx</span>
               </div>
               <p className="text-slate-500 text-[0.88rem] mb-6">
@@ -1683,7 +1854,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
             {/* Component 6: Resource Locker Item */}
             <div className="border-b border-black/5 pb-8">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-sans font-semibold text-[1.12rem] text-slate-900">6. Resource Locker Item (LockerItem)</h3>
+                <h3 className="font-sans font-medium text-[1.12rem] text-slate-900">6. Resource Locker Item (LockerItem)</h3>
                 <span className="font-mono text-xs text-slate-400">src/components/ui/LockerItem.tsx</span>
               </div>
               <p className="text-slate-500 text-[0.88rem] mb-6">
@@ -1702,7 +1873,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
             {/* Component 7: Contextual Badges */}
             <div className="border-b border-black/5 pb-8">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-sans font-semibold text-[1.12rem] text-slate-900">7. Contextual Badges (Badge)</h3>
+                <h3 className="font-sans font-medium text-[1.12rem] text-slate-900">7. Contextual Badges (Badge)</h3>
                 <span className="font-mono text-xs text-slate-400">src/components/ui/Badge.tsx</span>
               </div>
               <p className="text-slate-500 text-[0.88rem] mb-6">
@@ -1710,19 +1881,19 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
               </p>
               <div className="flex flex-wrap gap-4 items-center">
                 <div className="p-4 bg-slate-50 rounded-xl border border-black/5 flex items-center gap-3">
-                  <span className="text-[0.66rem] font-bold text-slate-400 uppercase">Now:</span>
+                  <span className="text-[0.66rem] font-medium text-slate-400 uppercase">Now:</span>
                   <Badge variant="now">Now</Badge>
                 </div>
                 <div className="p-4 bg-slate-50 rounded-xl border border-black/5 flex items-center gap-3">
-                  <span className="text-[0.66rem] font-bold text-slate-400 uppercase">Future:</span>
+                  <span className="text-[0.66rem] font-medium text-slate-400 uppercase">Future:</span>
                   <Badge variant="future">Future</Badge>
                 </div>
                 <div className="p-4 bg-slate-50 rounded-xl border border-black/5 flex items-center gap-3">
-                  <span className="text-[0.66rem] font-bold text-slate-400 uppercase">Clinical:</span>
+                  <span className="text-[0.66rem] font-medium text-slate-400 uppercase">Clinical:</span>
                   <Badge variant="clinical">Clinical Formulation</Badge>
                 </div>
                 <div className="p-4 bg-slate-50 rounded-xl border border-black/5 flex items-center gap-3">
-                  <span className="text-[0.66rem] font-bold text-slate-400 uppercase">Active:</span>
+                  <span className="text-[0.66rem] font-medium text-slate-400 uppercase">Active:</span>
                   <Badge variant="active">Active State</Badge>
                 </div>
               </div>
@@ -1731,7 +1902,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
             {/* Component 8: Toggle Switch */}
             <div className="border-b border-black/5 pb-8">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-sans font-semibold text-[1.12rem] text-slate-900">8. Toggle Switch (Switch)</h3>
+                <h3 className="font-sans font-medium text-[1.12rem] text-slate-900">8. Toggle Switch (Switch)</h3>
                 <span className="font-mono text-xs text-slate-400">src/components/ui/Switch.tsx</span>
               </div>
               <p className="text-slate-500 text-[0.88rem] mb-6">
@@ -1739,7 +1910,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
               </p>
               <div className="p-4 bg-slate-50 rounded-xl border border-black/5 flex items-center gap-6 max-w-sm">
                 <div className="flex-1">
-                  <div className="text-[0.86rem] font-bold text-slate-800">Circadian Alert Notifications</div>
+                  <div className="text-[0.86rem] font-medium text-slate-800">Circadian Alert Notifications</div>
                   <div className="text-[0.74rem] text-slate-400">Send updates according to optimal focus cycles</div>
                 </div>
                 <Switch 
@@ -1755,7 +1926,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
             {/* Component 9: Progress Bar */}
             <div className="border-b border-black/5 pb-8">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-sans font-semibold text-[1.12rem] text-slate-900">9. Standard Progress Bar (ProgressBar)</h3>
+                <h3 className="font-sans font-medium text-[1.12rem] text-slate-900">9. Standard Progress Bar (ProgressBar)</h3>
                 <span className="font-mono text-xs text-slate-400">src/components/ui/ProgressBar.tsx</span>
               </div>
               <p className="text-slate-500 text-[0.88rem] mb-6">
@@ -1773,7 +1944,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                       setDemoProgress(nextVal);
                       addLog(`ProgressBar: Value decreased to ${nextVal}%`);
                     }}
-                    className="text-xs font-bold text-slate-600 bg-white border border-black/5 px-2.5 py-1.5 rounded-lg shadow-xs hover:bg-slate-100 cursor-pointer"
+                    className="text-xs font-medium text-slate-600 bg-white border border-black/5 px-2.5 py-1.5 rounded-lg shadow-xs hover:bg-slate-100 cursor-pointer"
                   >
                     -15% Decrease
                   </button>
@@ -1783,7 +1954,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                       setDemoProgress(nextVal);
                       addLog(`ProgressBar: Value increased to ${nextVal}%`);
                     }}
-                    className="text-xs font-bold text-[var(--color-thread-mid-green)] bg-white border border-black/5 px-2.5 py-1.5 rounded-lg shadow-xs hover:bg-slate-100 cursor-pointer"
+                    className="text-xs font-medium text-[var(--color-thread-mid-green)] bg-white border border-black/5 px-2.5 py-1.5 rounded-lg shadow-xs hover:bg-slate-100 cursor-pointer"
                   >
                     +15% Increase
                   </button>
@@ -1794,7 +1965,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
             {/* Component 10: PageFooterCTA */}
             <div className="border-b border-black/5 pb-8">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-sans font-semibold text-[1.12rem] text-slate-900">10. Page Footer CTA Navigator (PageFooterCTA)</h3>
+                <h3 className="font-sans font-medium text-[1.12rem] text-slate-900">10. Page Footer CTA Navigator (PageFooterCTA)</h3>
                 <span className="font-mono text-xs text-slate-400">src/components/ui/PageFooterCTA.tsx</span>
               </div>
               <p className="text-slate-500 text-[0.88rem] mb-6">
@@ -1812,7 +1983,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
             {/* Component 11: Filter Category Selector (FilterTab) */}
             <div className="border-b border-black/5 pb-8">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-sans font-semibold text-[1.12rem] text-slate-900">11. Filter Category Selector (FilterTab)</h3>
+                <h3 className="font-sans font-medium text-[1.12rem] text-slate-900">11. Filter Category Selector (FilterTab)</h3>
                 <span className="font-mono text-xs text-slate-400">src/components/ui/FilterTab.tsx</span>
               </div>
               <p className="text-slate-500 text-[0.88rem] mb-6">
@@ -1836,7 +2007,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
             {/* Component 12: Interactive File Share Item (FileItem) */}
             <div className="border-b border-black/5 pb-8">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-sans font-semibold text-[1.12rem] text-slate-900">12. Interactive File Share Item (FileItem)</h3>
+                <h3 className="font-sans font-medium text-[1.12rem] text-slate-900">12. Interactive File Share Item (FileItem)</h3>
                 <span className="font-mono text-xs text-slate-400">src/components/ui/FileItem.tsx</span>
               </div>
               <p className="text-slate-500 text-[0.88rem] mb-6">
@@ -1861,7 +2032,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
             {/* Component 13: Circle Action Controls (IconButton) */}
             <div className="border-b border-black/5 pb-8">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-sans font-semibold text-[1.12rem] text-slate-900">13. Circle Action Controls (IconButton)</h3>
+                <h3 className="font-sans font-medium text-[1.12rem] text-slate-900">13. Circle Action Controls (IconButton)</h3>
                 <span className="font-mono text-xs text-slate-400">src/components/ui/IconButton.tsx</span>
               </div>
               <p className="text-slate-500 text-[0.88rem] mb-6">
@@ -1888,7 +2059,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
             {/* Component 14: Action Navigator Link (QuickLink) */}
             <div className="border-b border-black/5 pb-8">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-sans font-semibold text-[1.12rem] text-slate-900">14. Action Navigator Link (QuickLink)</h3>
+                <h3 className="font-sans font-medium text-[1.12rem] text-slate-900">14. Action Navigator Link (QuickLink)</h3>
                 <span className="font-mono text-xs text-slate-400">src/components/ui/QuickLink.tsx</span>
               </div>
               <p className="text-slate-500 text-[0.88rem] mb-6">
@@ -1915,7 +2086,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
             {/* Component 15: Nested Detail Value Card (ValueCard) */}
             <div className="border-b border-black/5 pb-8">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-sans font-semibold text-[1.12rem] text-slate-900">15. Nested Detail Value Card (ValueCard)</h3>
+                <h3 className="font-sans font-medium text-[1.12rem] text-slate-900">15. Nested Detail Value Card (ValueCard)</h3>
                 <span className="font-mono text-xs text-slate-400">src/components/ui/ValueCard.tsx</span>
               </div>
               <p className="text-slate-500 text-[0.88rem] mb-6">
@@ -1938,7 +2109,7 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
             {/* Component 16: Top Hero Action Card (HeroActionCard) */}
             <div>
               <div className="flex justify-between items-center mb-4">
-                <h3 className="font-sans font-semibold text-[1.12rem] text-slate-900">16. Top Hero Action Card (HeroActionCard)</h3>
+                <h3 className="font-sans font-medium text-[1.12rem] text-slate-900">16. Top Hero Action Card (HeroActionCard)</h3>
                 <span className="font-mono text-xs text-slate-400">src/components/ui/HeroActionCard.tsx</span>
               </div>
               <p className="text-slate-500 text-[0.88rem] mb-6">
@@ -1962,6 +2133,37 @@ export default function StyleGuidePage({ onPageChange }: StyleGuidePageProps) {
                     addLog("HeroActionCard: Navigating to Documents page");
                     onPageChange("documents");
                   }}
+                />
+              </div>
+            </div>
+
+            {/* Component 17: AI Copilot Input Bar (AICopilotBar) */}
+            <div className="border-b border-black/5 pb-8">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-sans font-medium text-[1.12rem] text-slate-900">17. AI Copilot Input Bar (AICopilotBar)</h3>
+                <span className="font-mono text-xs text-slate-400">src/components/ui/AICopilotBar.tsx</span>
+              </div>
+              <p className="text-slate-500 text-[0.88rem] mb-6">
+                Floating conversational interface for AI-powered diagnostics. Supports text input, file attachments, and expandable clinical responses.
+              </p>
+              <div className="max-w-xl">
+                <AICopilotBar currentChildName="Maya" placeholder="Ask anything about Maya's progress..." />
+              </div>
+            </div>
+
+            {/* Component 18: Clinical Checklist Item (ChecklistItem) */}
+            <div>
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-sans font-medium text-[1.12rem] text-slate-900">18. Clinical Checklist Item (ChecklistItem)</h3>
+                <span className="font-mono text-xs text-slate-400">src/components/ui/ChecklistItem.tsx</span>
+              </div>
+              <p className="text-slate-500 text-[0.88rem] mb-6">
+                Simple, high-contrast list item for diagnostic steps, observations, or required actions.
+              </p>
+              <div className="max-w-md p-6 bg-slate-50 rounded-xl border border-black/5">
+                <ChecklistItem 
+                  title="Complete Auditory Screening"
+                  description="Required to confirm environmental sound localization thresholds."
                 />
               </div>
             </div>

@@ -15,7 +15,7 @@ export function ChecklistItem({
         {icon}
       </div>
       <div>
-        <h4 className="text-[1.05rem] font-bold tracking-tight text-slate-900">
+        <h4 className="text-[1.05rem] font-medium tracking-tight text-slate-900">
           {title}
         </h4>
         <p className="text-[0.9rem] text-slate-500 mt-1">
