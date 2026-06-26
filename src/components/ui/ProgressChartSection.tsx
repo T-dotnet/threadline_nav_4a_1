@@ -39,7 +39,7 @@ export function ProgressChartSection({
         <SectionLabel className="mb-2">
           {chartLabel}
         </SectionLabel>
-        <h3 className="text-[1.15rem] font-semibold tracking-tight text-[var(--color-thread-dark-slate)] mb-5.5">
+        <h3 className="text-[1.15rem] font-medium tracking-tight text-[var(--color-thread-dark-slate)] mb-5.5">
           {chartSubtitle}
         </h3>
 
@@ -83,7 +83,7 @@ export function ProgressChartSection({
             <span 
               key={i} 
               className={cn(
-                i === activeLabelIndex && "font-bold text-[var(--color-thread-dark-slate)]"
+                i === activeLabelIndex && "font-medium text-[var(--color-thread-dark-slate)]"
               )}
             >
               {label}

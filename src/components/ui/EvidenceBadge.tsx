@@ -41,8 +41,8 @@ export const EvidenceBadge = React.forwardRef<HTMLDivElement, EvidenceBadgeProps
         {resolvedLabel && (
           <span
             className={cn(
-              "text-[0.64rem] tracking-[0.1em] uppercase font-semibold",
-              resolvedVariant === 'light' && "text-white/80 font-bold",
+              "text-[0.64rem] tracking-[0.1em] uppercase font-medium",
+              resolvedVariant === 'light' && "text-white/80 font-medium",
               resolvedVariant === 'default' && "text-[var(--color-thread-gray)]",
               labelClassName
             )}

@@ -20,7 +20,7 @@ export function LockerItem({
       <div className="w-[38px] h-[38px] rounded-[10px] bg-[var(--color-thread-light-green)]/60 text-[var(--color-thread-muted-green)] flex items-center justify-center mb-3.5">
         {icon}
       </div>
-      <h3 className="text-[1.02rem] font-semibold tracking-tight mb-1.75 text-slate-900 leading-tight">
+      <h3 className="text-[1.02rem] font-medium tracking-tight mb-1.75 text-slate-900 leading-tight">
         {title}
       </h3>
       <p className="text-[0.86rem] text-slate-500 leading-relaxed mb-3.5">

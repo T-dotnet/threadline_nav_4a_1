@@ -8,7 +8,7 @@ import {
   Check,
 } from "lucide-react";
 import { cn } from "../lib/utils";
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import { ActionLink } from "./ui/ActionLink";
 import { PageHeader } from "./ui/PageHeader";
 import { SectionTitle } from "./ui/SectionTitle";
@@ -76,12 +76,56 @@ const ALL_GUIDES = [
   },
 ];
 
+const INTAKE_GUIDES = [
+  {
+    category: "Session Prep",
+    catId: "prep",
+    title: "Questions to Bring to the First Session",
+    description:
+      "A short planning guide for the concerns, hopes, and examples worth bringing into the first conversation.",
+    readTime: "5 min read",
+    image: img2912,
+  },
+  {
+    category: "Documents",
+    catId: "documents",
+    title: "What to Upload Before Assessment",
+    description:
+      "Reports, teacher notes, work samples, and parent observations that can help the clinician understand the full picture.",
+    readTime: "4 min read",
+    image: img2947,
+  },
+  {
+    category: "Observation",
+    catId: "observation",
+    title: "What to Notice This Week",
+    description:
+      "Simple prompts for spotting patterns around routines, transitions, sleep, school, and friendships before the call.",
+    readTime: "6 min read",
+    image: img2912,
+  },
+  {
+    category: "Family Notes",
+    catId: "prep",
+    title: "Turning Concerns Into Useful Examples",
+    description:
+      "How to describe what you are seeing without needing clinical language or a finished explanation.",
+    readTime: "7 min read",
+    image: img2947,
+  },
+];
+
 export default function ResourcesPage() {
   const { currentChild } = useCurrentChild();
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
 
   const isLiam = currentChild.name === "Liam";
+  const isNew = Boolean(currentChild.isNew);
+
+  useEffect(() => {
+    setFilter("all");
+  }, [currentChild.name, isNew]);
 
   const handleClear = useCallback(() => {
     setSearch("");
@@ -89,11 +133,12 @@ export default function ResourcesPage() {
   }, []);
 
   const guidesWithDynamicName = useMemo(() => {
-    return ALL_GUIDES.map(g => ({
+    const guides = isNew ? INTAKE_GUIDES : ALL_GUIDES;
+    return guides.map(g => ({
       ...g,
       description: g.description.replace(/Maya/g, currentChild.name)
     }));
-  }, [currentChild.name]);
+  }, [currentChild.name, isNew]);
 
   const filteredGuides = useMemo(() => {
     return guidesWithDynamicName.filter((g) => {
@@ -119,12 +164,12 @@ export default function ResourcesPage() {
         description={
           <>
             <SectionDescription>
-              Short, practical, clinical-grade guides — tailored to {currentChild.name}'s current
-              focus areas, so what you see first is what's most useful right now.
+              {isNew
+                ? `Practical guides to help you prepare for ${currentChild.name}'s first session and assessment.`
+                : `Short, practical, clinical-grade guides — tailored to ${currentChild.name}'s current focus areas, so what you see first is what's most useful right now.`}
             </SectionDescription>
             <div className="flex items-center gap-2 text-[0.8rem] text-[var(--color-thread-gray)] mt-6">
-              <Check className="w-3.5 h-3.5 text-[var(--color-thread-mid-green)] stroke-[1.8]" /> Sorted
-              by clinical focus matching
+              <Check className="w-3.5 h-3.5 text-[var(--color-thread-mid-green)] stroke-[1.8]" /> {isNew ? "Sorted by intake preparation" : "Sorted by clinical focus matching"}
             </div>
           </>
         }
@@ -135,11 +180,13 @@ export default function ResourcesPage() {
         <div className="relative rounded-br-[36px] p-12 bg-watercolor">
           <HeroQuoteCard
             kicker="Featured guide"
-            quote={isLiam ? "Fostering long-term developmental velocity." : "Starting the upcoming school term with confidence."}
+            quote={isNew ? "Preparing for the first session." : isLiam ? "Fostering long-term developmental velocity." : "Starting the upcoming school term with confidence."}
             showQuotes={false}
             className="mb-0 shadow-premium"
             description={
-              isLiam ? (
+              isNew ? (
+                `A simple way to gather notes, examples, and questions before ${currentChild.name}'s first assessment.`
+              ) : isLiam ? (
                 `Advanced strategies for ${currentChild.name} to generalise his social integration wins into diverse, unstructured environments.`
               ) : (
                 `Strategies to manage ADHD-linked morning fatigue and prepare sensory transitions before ${currentChild.name} steps into the new classroom.`
@@ -161,11 +208,11 @@ export default function ResourcesPage() {
       {/* Modules Section */}
       <FadeInScroll className="mb-24">
         <div className="mb-8">
-          <span className="text-[0.68rem] tracking-[0.12em] uppercase font-bold text-[var(--color-thread-mid-green)] mb-3 block">
+          <span className="text-[0.68rem] tracking-[0.12em] uppercase font-medium text-[var(--color-thread-mid-green)] mb-3 block">
             AVAILABLE MODULES
           </span>
           <SectionTitle className="mb-0">
-            Personalised to {currentChild.name}'s focus.
+            {isNew ? `Prepare for ${currentChild.name}'s assessment.` : `Personalised to ${currentChild.name}'s focus.`}
           </SectionTitle>
         </div>
 
@@ -187,28 +234,30 @@ export default function ResourcesPage() {
             onClick={() => setFilter("all")}
           />
           <FilterTab
-            active={filter === "tools"}
-            label="Tools & Templates"
-            onClick={() => setFilter("tools")}
+            active={filter === (isNew ? "prep" : "tools")}
+            label={isNew ? "Session Prep" : "Tools & Templates"}
+            onClick={() => setFilter(isNew ? "prep" : "tools")}
           />
           <FilterTab
-            active={filter === "health"}
-            label="Health & Clinical"
-            onClick={() => setFilter("health")}
+            active={filter === (isNew ? "documents" : "health")}
+            label={isNew ? "Documents" : "Health & Clinical"}
+            onClick={() => setFilter(isNew ? "documents" : "health")}
           />
           <FilterTab
-            active={filter === "classroom"}
-            label="Classroom Strategies"
-            onClick={() => setFilter("classroom")}
+            active={filter === (isNew ? "observation" : "classroom")}
+            label={isNew ? "Observation" : "Classroom Strategies"}
+            onClick={() => setFilter(isNew ? "observation" : "classroom")}
           />
-          <FilterTab
-            active={filter === "emotional"}
-            label="Emotional Regulation"
-            onClick={() => setFilter("emotional")}
-          />
+          {!isNew && (
+            <FilterTab
+              active={filter === "emotional"}
+              label="Emotional Regulation"
+              onClick={() => setFilter("emotional")}
+            />
+          )}
         </div>
 
-        <span className="text-[0.66rem] tracking-[0.16em] uppercase text-slate-400 font-semibold mb-6 block">
+        <span className="text-[0.66rem] tracking-[0.16em] uppercase text-slate-400 font-medium mb-6 block">
           {filteredGuides.length}{" "}
           {filteredGuides.length === 1 ? "article" : "articles"} found
         </span>
@@ -233,7 +282,7 @@ export default function ResourcesPage() {
               variant="default"
               as="button"
               onClick={handleClear}
-              className="mt-3 block mx-auto font-semibold"
+              className="mt-3 block mx-auto font-medium"
             >
               Clear search
             </ActionLink>
@@ -252,14 +301,21 @@ export default function ResourcesPage() {
           </SectionTitle>
         </div>
         <div className="grid grid-cols-3 gap-6 max-md:grid-cols-1">
-          {[
+          {(isNew ? [
+            "First session preparation",
+            "Documents to gather",
+            "Home observations",
+            "School notes",
+            "Daily routines",
+            "Questions for clinicians",
+          ] : [
             "Understanding ADHD",
             "Emotional Regulation",
             "School Support",
             "Learning & Cognition",
             "Daily Routines",
             "Working with Professionals",
-          ].map((t, i) => (
+          ]).map((t, i) => (
             <ListItemCard key={i} className="bg-white border-white/5 transition-all">
               {t}
             </ListItemCard>

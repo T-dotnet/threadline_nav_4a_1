@@ -13,11 +13,23 @@ export function GuideCard({
   image,
   cornerClass = "rounded-tr-[32px]",
   actionText = "Read guide",
+  onClick,
+  disableHover = false,
   className,
 }: GuideCardProps) {
   return (
     <motion.div
-      {...scaleHover}
+      {...(disableHover ? {} : scaleHover)}
+      onClick={onClick}
+      onKeyDown={(event) => {
+        if (!onClick) return;
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onClick();
+        }
+      }}
+      role={onClick ? "button" : undefined}
+      tabIndex={onClick ? 0 : undefined}
       className={cn(
         "bg-white flex flex-col cursor-pointer transition-all group overflow-hidden",
         cornerClass,
@@ -29,7 +41,10 @@ export function GuideCard({
           <img
             src={image}
             alt={title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            className={cn(
+              "w-full h-full object-cover transition-transform duration-500",
+              !disableHover && "group-hover:scale-105"
+            )}
             referrerPolicy="no-referrer"
           />
         </div>
@@ -39,7 +54,7 @@ export function GuideCard({
           {title}
         </h3>
         <div className="flex gap-3.5 flex-wrap items-center mb-3 text-[0.78rem] text-[var(--color-thread-gray)] font-sans">
-          <span className="text-[0.6rem] tracking-[0.12em] uppercase font-bold text-[var(--color-thread-mid-green)]">
+          <span className="text-[0.6rem] tracking-[0.12em] uppercase font-medium text-[var(--color-thread-mid-green)]">
             {category}
           </span>
           <span>{readTime}</span>
@@ -48,7 +63,14 @@ export function GuideCard({
           {description}
         </p>
         <div className="flex items-center justify-between pt-4 mt-6">
-          <ActionLink variant="slate" as="span" className="group-hover:text-[var(--color-thread-mid-green)] font-semibold text-[0.84rem]">
+          <ActionLink
+            variant="slate"
+            as="span"
+            className={cn(
+              "font-medium text-[0.84rem]",
+              !disableHover && "group-hover:text-[var(--color-thread-mid-green)]"
+            )}
+          >
             {actionText}
           </ActionLink>
         </div>

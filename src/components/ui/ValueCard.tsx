@@ -62,7 +62,7 @@ export const ValueCard = React.forwardRef<HTMLDivElement, ValueCardProps>(
             strokeWidth="1"
           />
         </svg>
-        <h3 className="text-[1.18rem] font-semibold tracking-tight mb-2.5 relative">
+        <h3 className="text-[1.18rem] font-medium tracking-tight mb-2.5 relative">
           {title}
         </h3>
         {typeof content === 'string' ? (

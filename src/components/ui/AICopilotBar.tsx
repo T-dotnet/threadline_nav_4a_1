@@ -89,7 +89,7 @@ export function AICopilotBar({
           >
             ×
           </motion.button>
-          <div className="text-[0.66rem] tracking-[0.14em] uppercase text-[var(--color-thread-mid-green)] font-bold mb-1.5">
+          <div className="text-[0.66rem] tracking-[0.14em] uppercase text-[var(--color-thread-mid-green)] font-medium mb-1.5">
             Co-Pilot Assistant
           </div>
           <p

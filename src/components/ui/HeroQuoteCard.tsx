@@ -54,7 +54,7 @@ export const HeroQuoteCard = React.forwardRef<HTMLDivElement, HeroQuoteCardProps
           <>
             <div className="relative flex-1">
               {kicker && (
-                <span className={cn("text-[0.75rem] tracking-[0.1em] uppercase font-bold mb-6 block", variant === 'green' ? 'text-emerald-200' : 'text-[var(--hero-accent)]')}>
+                <span className={cn("text-[0.75rem] tracking-[0.1em] uppercase font-medium mb-6 block", variant === 'green' ? 'text-emerald-200' : 'text-[var(--hero-accent)]')}>
                   {kicker}
                 </span>
               )}
@@ -84,7 +84,7 @@ export const HeroQuoteCard = React.forwardRef<HTMLDivElement, HeroQuoteCardProps
           <>
             <div className="relative">
               {kicker && (
-                <span className={cn("text-[0.75rem] tracking-[0.1em] uppercase font-bold mb-6 block", variant === 'green' ? 'text-emerald-200' : 'text-[var(--hero-accent)]')}>
+                <span className={cn("text-[0.75rem] tracking-[0.1em] uppercase font-medium mb-6 block", variant === 'green' ? 'text-emerald-200' : 'text-[var(--hero-accent)]')}>
                   {kicker}
                 </span>
               )}

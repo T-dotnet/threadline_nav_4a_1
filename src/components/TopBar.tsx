@@ -23,6 +23,7 @@ import { Avatar } from "./ui/Avatar";
 import { IconButton } from "./ui/IconButton";
 import { cn } from "../lib/utils";
 import { motion, AnimatePresence } from "motion/react";
+import { isNewChildAllowedPage } from "../navigation";
 
 import { useCurrentChild } from "../context/ChildContext";
 import { useCallback } from "react";
@@ -50,6 +51,10 @@ export default function TopBar({
   const handleChildSwitch = useCallback((child: Child) => {
     setChild(child);
     if (currentPage === "all-children") {
+      onPageChange("home");
+    } else if (child.isNew && !isNewChildAllowedPage(currentPage)) {
+      onPageChange("home");
+    } else if (!child.isNew && currentPage === "preview") {
       onPageChange("home");
     }
     setIsDropdownOpen(false);
@@ -100,7 +105,7 @@ export default function TopBar({
                 fallback={<Users className="w-3.5 h-3.5 stroke-[2.2]" />}
               />
               <div className="flex flex-col text-left leading-none">
-                <span className="font-semibold text-[0.9rem] text-slate-900">
+                <span className="font-medium text-[0.9rem] text-slate-900">
                   All Children
                 </span>
                 <span className="text-[0.68rem] text-slate-500 mt-0.5">
@@ -116,11 +121,11 @@ export default function TopBar({
                 className="bg-[var(--color-thread-mid-green)] text-white font-serif"
               />
               <div className="flex flex-col text-left leading-none">
-                <span className="font-semibold text-[0.9rem] text-slate-900">
+                <span className="font-medium text-[0.9rem] text-slate-900">
                   {currentChild.name}
                 </span>
                 <span className="text-[0.72rem] text-slate-500 mt-0.5">
-                  Age {currentChild.age}
+                  {currentChild.isNew ? "Assessment pending" : `Age ${currentChild.age}`}
                 </span>
               </div>
             </>
@@ -143,7 +148,7 @@ export default function TopBar({
               className="absolute top-14 left-0 w-60 bg-white rounded-2xl border border-black/5 shadow-dropdown py-2 z-50 font-sans"
             >
               <div className="px-4 py-2.5">
-                <span className="text-[0.6rem] tracking-[0.16em] uppercase text-slate-400 font-semibold">
+                <span className="text-[0.6rem] tracking-[0.16em] uppercase text-slate-400 font-medium">
                   Select Child Profile
                 </span>
               </div>
@@ -170,7 +175,7 @@ export default function TopBar({
                   />
                   <div className="flex flex-col leading-none">
                     <span className={cn(
-                      "text-[0.92rem] tracking-tight font-semibold",
+                      "text-[0.92rem] tracking-tight font-medium",
                       currentPage === "all-children"
                         ? "text-[var(--color-thread-mid-green)]"
                         : "text-[var(--color-thread-heading)]"
@@ -204,14 +209,14 @@ export default function TopBar({
                         className={cn(
                           "text-[0.92rem] tracking-tight",
                           (currentChild.name === child.name && currentPage !== "all-children")
-                            ? "font-semibold text-slate-900"
+                            ? "font-medium text-slate-900"
                             : "font-medium text-slate-700",
                         )}
                       >
                         {child.name}
                       </span>
                       <span className="text-[0.7rem] text-slate-500 mt-0.5">
-                        Age {child.age}
+                        {child.isNew ? "Intake in progress" : `Age ${child.age}`}
                       </span>
                     </div>
                   </button>
@@ -261,40 +266,66 @@ export default function TopBar({
                   <span className="text-[0.75rem] tracking-[0.1em] uppercase text-[var(--color-thread-mid-green)] font-medium mb-1.5 block">
                     Live updates for {currentChild.name}
                   </span>
-                  <h2 className="text-[1.05rem] font-semibold text-[var(--color-thread-dark-slate)] tracking-tight leading-none">
-                    Development Alerts
+                  <h2 className="text-[1.05rem] font-medium text-[var(--color-thread-dark-slate)] tracking-tight leading-none">
+                    {currentChild.isNew ? "Setup Reminders" : "Development Alerts"}
                   </h2>
                 </div>
 
                 <div className="flex flex-col gap-3.5 px-6 mb-6 max-h-[340px] overflow-y-auto">
-                  <div className="bg-white rounded-[16px] p-4.5 relative overflow-hidden shadow-sm hover:shadow-md transition-all group">
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--color-thread-mid-green)]" />
-                    <h3 className="font-semibold text-[var(--color-thread-dark-slate)] text-[0.95rem] mb-1.5 tracking-tight group-hover:text-[var(--color-thread-mid-green)] transition-colors">
-                      Sleep latency watch:
-                    </h3>
-                    <p className="text-[0.88rem] text-[var(--color-thread-gray)] leading-relaxed">
-                      Mild circadian disruption detected. Recommended routine
-                      alignment before reviews day.
-                    </p>
-                  </div>
+                  {currentChild.isNew ? (
+                    <>
+                      <div className="bg-white rounded-[16px] p-4.5 relative overflow-hidden shadow-sm hover:shadow-md transition-all group">
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-amber-400" />
+                        <h3 className="font-medium text-[var(--color-thread-dark-slate)] text-[0.95rem] mb-1.5 tracking-tight group-hover:text-amber-600 transition-colors">
+                          Questionnaire still open:
+                        </h3>
+                        <p className="text-[0.88rem] text-[var(--color-thread-gray)] leading-relaxed">
+                          Finish the everyday-life sections before the first session so the clinician has the full context.
+                        </p>
+                      </div>
 
-                  <div className="bg-white rounded-[16px] p-4.5 relative overflow-hidden shadow-sm hover:shadow-md transition-all group">
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--color-thread-mid-green)]" />
-                    <h3 className="font-semibold text-[var(--color-thread-dark-slate)] text-[0.95rem] mb-1.5 tracking-tight group-hover:text-[var(--color-thread-mid-green)] transition-colors">
-                      Primary strategy completed:
-                    </h3>
-                    <p className="text-[0.88rem] text-[var(--color-thread-gray)] leading-relaxed">
-                      Parent feedback form compiled & secure cloud-synced to
-                      primary clinical therapist.
-                    </p>
-                  </div>
+                      <div className="bg-white rounded-[16px] p-4.5 relative overflow-hidden shadow-sm hover:shadow-md transition-all group">
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--color-thread-mid-green)]" />
+                        <h3 className="font-medium text-[var(--color-thread-dark-slate)] text-[0.95rem] mb-1.5 tracking-tight group-hover:text-[var(--color-thread-mid-green)] transition-colors">
+                          Session preparation:
+                        </h3>
+                        <p className="text-[0.88rem] text-[var(--color-thread-gray)] leading-relaxed">
+                          Upload reports, notes, or school examples before the telehealth appointment.
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="bg-white rounded-[16px] p-4.5 relative overflow-hidden shadow-sm hover:shadow-md transition-all group">
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--color-thread-mid-green)]" />
+                        <h3 className="font-medium text-[var(--color-thread-dark-slate)] text-[0.95rem] mb-1.5 tracking-tight group-hover:text-[var(--color-thread-mid-green)] transition-colors">
+                          Sleep latency watch:
+                        </h3>
+                        <p className="text-[0.88rem] text-[var(--color-thread-gray)] leading-relaxed">
+                          Mild circadian disruption detected. Recommended routine
+                          alignment before reviews day.
+                        </p>
+                      </div>
+
+                      <div className="bg-white rounded-[16px] p-4.5 relative overflow-hidden shadow-sm hover:shadow-md transition-all group">
+                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[var(--color-thread-mid-green)]" />
+                        <h3 className="font-medium text-[var(--color-thread-dark-slate)] text-[0.95rem] mb-1.5 tracking-tight group-hover:text-[var(--color-thread-mid-green)] transition-colors">
+                          Primary strategy completed:
+                        </h3>
+                        <p className="text-[0.88rem] text-[var(--color-thread-gray)] leading-relaxed">
+                          Parent feedback form compiled & secure cloud-synced to
+                          primary clinical therapist.
+                        </p>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="border-t border-black/5 px-6 pt-5 flex items-center justify-between">
                   <div className="flex items-center gap-4">
                     <button
                       onClick={() => setIsAlertsOpen(false)}
-                      className="text-[0.84rem] font-semibold text-[var(--color-thread-gray)] hover:text-[var(--color-thread-dark-slate)] transition-colors"
+                      className="text-[0.84rem] font-medium text-[var(--color-thread-gray)] hover:text-[var(--color-thread-dark-slate)] transition-colors"
                     >
                       Cleared all notices
                     </button>
@@ -328,7 +359,7 @@ export default function TopBar({
                 className="absolute top-14 right-0 w-64 bg-white rounded-2xl border border-black/5 shadow-dropdown py-2.5 z-50 font-sans"
               >
                 <div className="px-4.5 py-2 mb-1.5 border-b border-black/5">
-                  <span className="text-[0.65rem] tracking-[0.12em] uppercase text-slate-400 font-bold block mb-0.5">
+                  <span className="text-[0.65rem] tracking-[0.12em] uppercase text-slate-400 font-medium block mb-0.5">
                     Clinical Workspace
                   </span>
                   <span className="text-[0.80rem] font-medium text-slate-700 block truncate">
@@ -442,7 +473,7 @@ export default function TopBar({
                   <span className="font-serif font-medium text-[1.22rem] tracking-tight text-[var(--color-thread-heading)]">
                     Threadline
                   </span>
-                  <span className="font-sans text-[0.55rem] tracking-[0.22em] uppercase text-[var(--color-thread-gray)] font-semibold mt-1">
+                  <span className="font-sans text-[0.55rem] tracking-[0.22em] uppercase text-[var(--color-thread-gray)] font-medium mt-1">
                     Safe Harbor
                   </span>
                 </div>
@@ -466,11 +497,11 @@ export default function TopBar({
                   className="bg-[var(--color-thread-mid-green)] text-white font-serif"
                 />
                 <div className="flex flex-col text-left leading-none">
-                  <span className="font-semibold text-[0.95rem] text-slate-900">
+                  <span className="font-medium text-[0.95rem] text-slate-900">
                     {currentPage === "all-children" ? "All Children" : currentChild.name}
                   </span>
                   <span className="text-[0.74rem] text-slate-500 mt-1">
-                    {currentPage === "all-children" ? "Family Synthesis" : `Age ${currentChild.age}`}
+                    {currentPage === "all-children" ? "Family Synthesis" : currentChild.isNew ? "Assessment pending" : `Age ${currentChild.age}`}
                   </span>
                 </div>
               </div>
@@ -479,7 +510,7 @@ export default function TopBar({
                   setIsDropdownOpen(true);
                   setIsMobileMenuOpen(false);
                 }}
-                className="text-xs font-semibold text-[var(--color-thread-mid-green)] bg-white border border-black/5 py-1.5 px-3 rounded-lg shadow-xs cursor-pointer hover:bg-slate-50"
+                className="text-xs font-medium text-[var(--color-thread-mid-green)] bg-white border border-black/5 py-1.5 px-3 rounded-lg shadow-xs cursor-pointer hover:bg-slate-50"
               >
                 Switch Profile
               </button>
@@ -487,10 +518,16 @@ export default function TopBar({
 
             {/* Navigation links */}
             <div className="flex flex-col gap-2.5 flex-1">
-              <span className="text-[0.65rem] tracking-[0.16em] uppercase text-slate-400 font-bold mb-1.5 px-3">
+              <span className="text-[0.65rem] tracking-[0.16em] uppercase text-slate-400 font-medium mb-1.5 px-3">
                 Navigation Menu
               </span>
-              {[
+              {(currentChild.isNew ? [
+                { id: "home", label: "Home", icon: Home },
+                { id: "understanding", label: "Understanding", icon: Info },
+                { id: "resources", label: "Resources", icon: BookOpen },
+                { id: "settings", label: "App Settings", icon: Settings },
+                { id: "style-guide", label: "Style Guide & Tokens", icon: Palette },
+              ] : [
                 { id: "home", label: "Home", icon: Home },
                 { id: "understanding", label: "Understanding", icon: Info },
                 { id: "priorities", label: "Priorities", icon: ListTodo },
@@ -500,7 +537,7 @@ export default function TopBar({
                 { id: "documents", label: "Documents", icon: Lock },
                 { id: "settings", label: "App Settings", icon: Settings },
                 { id: "style-guide", label: "Style Guide & Tokens", icon: Palette },
-              ].map((item) => {
+              ]).map((item) => {
                 const isActive = currentPage === item.id;
                 return (
                   <button
@@ -512,7 +549,7 @@ export default function TopBar({
                     className={cn(
                       "flex items-center gap-4 px-4 py-4 rounded-xl text-[1rem] font-medium transition-all text-left cursor-pointer min-h-[48px]",
                       isActive
-                        ? "bg-[var(--color-thread-light-green)] text-[var(--color-thread-dark-slate)] font-bold shadow-xs"
+                        ? "bg-[var(--color-thread-light-green)] text-[var(--color-thread-dark-slate)] font-medium shadow-xs"
                         : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
                     )}
                   >
