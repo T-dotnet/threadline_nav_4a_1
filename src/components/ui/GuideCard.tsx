@@ -3,7 +3,6 @@ import { motion } from "motion/react"
 import { cn } from "../../lib/utils"
 import { ActionLink } from "./ActionLink"
 import { GuideCardProps } from "../../types"
-import { scaleHover } from "../../lib/motion-presets"
 
 export function GuideCard({
   category,
@@ -19,7 +18,6 @@ export function GuideCard({
 }: GuideCardProps) {
   return (
     <motion.div
-      {...(disableHover ? {} : scaleHover)}
       onClick={onClick}
       onKeyDown={(event) => {
         if (!onClick) return;
@@ -31,7 +29,8 @@ export function GuideCard({
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
       className={cn(
-        "bg-white flex flex-col cursor-pointer transition-all group overflow-hidden",
+        "bg-white flex flex-col transition-all group overflow-hidden",
+        onClick && "cursor-pointer",
         cornerClass,
         className
       )}
@@ -41,10 +40,7 @@ export function GuideCard({
           <img
             src={image}
             alt={title}
-            className={cn(
-              "w-full h-full object-cover transition-transform duration-500",
-              !disableHover && "group-hover:scale-105"
-            )}
+            className="w-full h-full object-cover"
             referrerPolicy="no-referrer"
           />
         </div>
@@ -66,10 +62,7 @@ export function GuideCard({
           <ActionLink
             variant="slate"
             as="span"
-            className={cn(
-              "font-medium text-[0.84rem]",
-              !disableHover && "group-hover:text-[var(--color-thread-mid-green)]"
-            )}
+            className="font-medium text-[0.84rem]"
           >
             {actionText}
           </ActionLink>

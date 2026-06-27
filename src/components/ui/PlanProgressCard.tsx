@@ -3,12 +3,20 @@ import { Calendar } from "lucide-react";
 import { cn } from "../../lib/utils";
 import { ProgressBar } from "./ProgressBar";
 
+interface PlanProgressDetail {
+  label: string;
+  value: string;
+  icon?: React.ReactNode;
+}
+
 interface PlanProgressCardProps {
   progress: number;
   statusText: string;
   nextReview: string;
   className?: string;
   title?: string;
+  footerLabel?: string;
+  details?: PlanProgressDetail[];
 }
 
 export function PlanProgressCard({
@@ -17,10 +25,21 @@ export function PlanProgressCard({
   nextReview,
   className,
   title = "This Quarter's Plan Progress",
+  footerLabel = "Next review",
+  details,
 }: PlanProgressCardProps) {
   const parts = statusText.split(" — ");
   const mainStatus = parts[0];
   const subStatus = parts[1];
+  const footerDetails = details?.length
+    ? details
+    : [
+        {
+          label: footerLabel,
+          value: nextReview,
+          icon: <Calendar className="w-4 h-4 stroke-[1.8]" />,
+        },
+      ];
 
   return (
     <div
@@ -54,14 +73,20 @@ export function PlanProgressCard({
           />
         </div>
         
-        <div className="flex items-center gap-2 text-[0.84rem] opacity-60 border-t border-current/10 pt-4.5">
-          <Calendar className="w-4 h-4 stroke-[1.8]" />
-          <span>
-            Next review:{" "}
-            <strong className="opacity-100 font-medium ml-1">
-              {nextReview}
-            </strong>
-          </span>
+        <div className="space-y-2.5 text-[0.84rem] opacity-70 border-t border-current/10 pt-4.5">
+          {footerDetails.map((detail) => (
+            <div key={`${detail.label}-${detail.value}`} className="flex items-center gap-2">
+              <span className="flex h-4 w-4 shrink-0 items-center justify-center">
+                {detail.icon || <Calendar className="w-4 h-4 stroke-[1.8]" />}
+              </span>
+              <span>
+                {detail.label}:{" "}
+                <strong className="opacity-100 font-medium ml-1">
+                  {detail.value}
+                </strong>
+              </span>
+            </div>
+          ))}
         </div>
       </div>
     </div>

@@ -20,11 +20,35 @@ import AllChildrenPage from './components/AllChildrenPage';
 import StyleGuidePage from './components/StyleGuidePage';
 import AddChildFlow from './components/AddChildFlow';
 import NewChildPreviewPage from './components/NewChildPreviewPage';
+import WhatYouNoticedPage from './components/WhatYouNoticedPage';
 import ScrollToTop from './components/ScrollToTop';
 
 import { ChildProvider } from './context/ChildContext';
 import { LockerProvider } from './context/LockerContext';
 import { useCurrentChild } from './context/ChildContext';
+
+function resetStoredStateIfRequested() {
+  if (typeof window === 'undefined') return;
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('reset') !== '1') return;
+
+  [
+    'threadline-children',
+    'threadline-current-child',
+    'thread-theme',
+    'thread-font',
+    'thread-hero-style',
+    'thread-secondary-style',
+  ].forEach((key) => {
+    try {
+      localStorage.removeItem(key);
+    } catch {
+      // Storage can be unavailable in restricted contexts; the app will still use defaults.
+    }
+  });
+
+  window.history.replaceState({}, '', '/');
+}
 
 function AppContent() {
   const navigate = useNavigate();
@@ -62,12 +86,16 @@ function AppContent() {
   }, []);
 
   const [isSetupOpen, setIsSetupOpen] = useState(false);
+  const [setupInitialStep, setSetupInitialStep] = useState<1 | 2 | 3 | 4 | 5 | "welcome">("welcome");
 
   const handlePageChange = (page: Page) => {
     navigate(`/${page === 'all-children' ? '' : page}`);
   };
 
-  const openSetup = () => setIsSetupOpen(true);
+  const openSetup = (step: 1 | 2 | 3 | 4 | 5 | "welcome" = "welcome") => {
+    setSetupInitialStep(step);
+    setIsSetupOpen(true);
+  };
   const closeSetup = () => setIsSetupOpen(false);
 
   const withPreAssessmentGuard = (element: ReactElement) => (
@@ -80,6 +108,7 @@ function AppContent() {
       {isSetupOpen && (
         <AddChildFlow
           asModal
+          initialStep={setupInitialStep}
           onComplete={closeSetup}
           onCancel={closeSetup}
         />
@@ -117,6 +146,7 @@ function AppContent() {
               <Route path="/" element={<AllChildrenPage onPageChange={handlePageChange} />} />
               <Route path="/home" element={withPreAssessmentGuard(<HomePage onPageChange={handlePageChange} onOpenSetup={openSetup} />)} />
               <Route path="/preview" element={<NewChildPreviewPage onPageChange={handlePageChange} onOpenSetup={openSetup} />} />
+              <Route path="/what-you-noticed" element={currentChild.isNew ? <WhatYouNoticedPage onPageChange={handlePageChange} onOpenSetup={openSetup} /> : <Navigate to="/roadmap" replace />} />
               <Route path="/understanding" element={<UnderstandingPage onPageChange={handlePageChange} onOpenSetup={openSetup} />} />
               <Route path="/priorities" element={withPreAssessmentGuard(<PrioritiesPage onPageChange={handlePageChange} />)} />
               <Route path="/roadmap" element={withPreAssessmentGuard(<RoadmapPage onPageChange={handlePageChange} />)} />
@@ -141,6 +171,8 @@ function AppContent() {
 }
 
 export default function App() {
+  resetStoredStateIfRequested();
+
   return (
     <BrowserRouter>
       <ChildProvider>

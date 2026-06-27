@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { ArrowRight, CheckCircle2, LineChart, ListTodo, Lock, Milestone, Users } from "lucide-react";
+import { ArrowRight, CalendarClock, CheckCircle2, ClipboardList, LineChart, ListTodo, Lock, Milestone, Upload, Users } from "lucide-react";
 import { Page } from "../types";
 import { useCurrentChild } from "../context/ChildContext";
 import { QUESTIONNAIRE_SECTIONS, getCompletedQuestionnaireSections } from "../questionnaire";
@@ -14,10 +14,14 @@ import { SectionDescription } from "./ui/SectionDescription";
 import { TimelineStep } from "./ui/TimelineStep";
 import { GuideCard } from "./ui/GuideCard";
 import { PageFooterCTA } from "./ui/PageFooterCTA";
+import { FirstSessionCard } from "./ui/FirstSessionCard";
+import pediatricianQuestionsImg from "../assets/images/pediatrician_questions_thumbnail_1781935339183.jpg";
+import homeFamilyImg from "../assets/images/home_family_watercolor.png";
+import classroomObservationImg from "../assets/images/classroom_fatigue_thumbnail_1781935350699.jpg";
 
 interface NewChildPreviewPageProps {
   onPageChange: (page: Page) => void;
-  onOpenSetup?: () => void;
+  onOpenSetup?: (step?: 1 | 2 | 3 | 4 | 5 | "welcome") => void;
 }
 
 const previewSections = [
@@ -59,6 +63,8 @@ export default function NewChildPreviewPage({ onPageChange, onOpenSetup }: NewCh
   const { currentChild } = useCurrentChild();
   const answers = currentChild.intake?.questionnaireAnswers || {};
   const completedSections = getCompletedQuestionnaireSections(answers);
+  const firstSessionDate = currentChild.intake?.sessionDay ? `Thu ${currentChild.intake.sessionDay} Jun` : "Thu 26 Jun";
+  const firstSessionTime = currentChild.intake?.sessionTime || "4:00 pm";
 
   return (
     <motion.div
@@ -79,22 +85,26 @@ export default function NewChildPreviewPage({ onPageChange, onOpenSetup }: NewCh
           }
         />
 
-        <HeroQuoteCard
-          kicker="Pre-assessment mode"
-          quote={`We're gathering the full picture for ${currentChild.name}. Once the questionnaire, documents, and first session are reviewed, these sections will open with real clinical context.`}
-          evidenceLevel={1}
-          evidenceText="Intake in progress"
-          className="mb-24"
-          action={
-            <Button
-              variant="forest"
-              onClick={() => onOpenSetup?.()}
-              rightIcon={<ArrowRight className="w-3.5 h-3.5 stroke-[2]" />}
-            >
-              Continue setup
-            </Button>
-          }
-        />
+        <div className="grid grid-cols-[2fr_1fr] md:gap-6 max-md:grid-cols-1 max-md:gap-y-6 mb-24">
+          <HeroQuoteCard
+            kicker="Pre-assessment mode"
+            quote={`We're gathering the full picture for ${currentChild.name}. Once the questionnaire, documents, and first session are reviewed, these sections will open with real clinical context.`}
+            evidenceLevel={1}
+            evidenceText="Intake in progress"
+            className="h-full"
+            action={
+              <Button
+                variant="mint"
+                onClick={() => onOpenSetup?.()}
+                rightIcon={<ArrowRight className="w-3.5 h-3.5 stroke-[2]" />}
+              >
+                Continue setup
+              </Button>
+            }
+          />
+
+          <FirstSessionCard date={firstSessionDate} time={firstSessionTime} />
+        </div>
 
         <FadeInScroll className="mb-24">
           <div>
@@ -110,7 +120,7 @@ export default function NewChildPreviewPage({ onPageChange, onOpenSetup }: NewCh
               return (
                 <div
                   key={section.title}
-                  className={`bg-white border border-black/5 shadow-premium-light p-7.5 ${corners[index]} transition-all duration-300`}
+                  className={`bg-white p-7.5 ${corners[index]} transition-all duration-300`}
                 >
                   <div className={`w-11 h-11 rounded-full flex items-center justify-center mb-6 transition-colors duration-300 ${
                     hasContext
@@ -159,21 +169,66 @@ export default function NewChildPreviewPage({ onPageChange, onOpenSetup }: NewCh
               title="Finish the questionnaire"
               meta="Intake"
               metaTag="Now"
-              description="Your everyday observations give the clinician useful context before the call."
+              description={
+                <div className="space-y-3">
+                  <p className="text-[0.92rem] text-[var(--color-thread-gray)] leading-relaxed">
+                    Your everyday observations give the clinician useful context before the call.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="mint"
+                    className="min-h-[38px] px-4 py-2 text-[0.78rem]"
+                    onClick={() => onOpenSetup?.(4)}
+                    rightIcon={<ClipboardList className="w-3.5 h-3.5 stroke-[2]" />}
+                  >
+                    Continue questionnaire
+                  </Button>
+                </div>
+              }
             />
             <TimelineStep
               todo
               title="Add helpful documents during setup"
               meta="Setup"
               metaTag="Optional"
-              description="Upload reports, school notes, or examples as part of setup. You can add more later."
+              description={
+                <div className="space-y-3">
+                  <p className="text-[0.92rem] text-[var(--color-thread-gray)] leading-relaxed">
+                    Upload reports, school notes, or examples as part of setup. You can add more later.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="muted"
+                    className="min-h-[38px] px-4 py-2 text-[0.78rem]"
+                    onClick={() => onOpenSetup?.(5)}
+                    rightIcon={<Upload className="w-3.5 h-3.5 stroke-[2]" />}
+                  >
+                    Upload documents
+                  </Button>
+                </div>
+              }
             />
             <TimelineStep
               todo
               title="Attend the first session"
               meta="Telehealth"
               metaTag="Booked"
-              description="After clinical review, the assessment pages will open with real priorities and next steps."
+              description={
+                <div className="space-y-3">
+                  <p className="text-[0.92rem] text-[var(--color-thread-gray)] leading-relaxed">
+                    After clinical review, the assessment pages will open with real priorities and next steps.
+                  </p>
+                  <Button
+                    type="button"
+                    variant="muted"
+                    className="min-h-[38px] px-4 py-2 text-[0.78rem]"
+                    onClick={() => onOpenSetup?.(3)}
+                    rightIcon={<CalendarClock className="w-3.5 h-3.5 stroke-[2]" />}
+                  >
+                    Reschedule or cancel
+                  </Button>
+                </div>
+              }
             />
           </div>
         </FadeInScroll>
@@ -189,6 +244,7 @@ export default function NewChildPreviewPage({ onPageChange, onOpenSetup }: NewCh
               title="Questions to bring to the call"
               description="Keep a short list of what you want the clinician to understand first."
               readTime="5 min"
+              image={pediatricianQuestionsImg}
               cornerClass="rounded-tr-[32px]"
             />
             <GuideCard
@@ -196,6 +252,7 @@ export default function NewChildPreviewPage({ onPageChange, onOpenSetup }: NewCh
               title="What is useful to add"
               description="Reports, school notes, examples of work, or observations from home can all help."
               readTime="4 min"
+              image={homeFamilyImg}
               cornerClass="rounded-tl-[32px]"
             />
             <GuideCard
@@ -203,6 +260,7 @@ export default function NewChildPreviewPage({ onPageChange, onOpenSetup }: NewCh
               title="What to notice this week"
               description="Look for patterns around routines, transitions, sleep, school, and friendships."
               readTime="6 min"
+              image={classroomObservationImg}
               cornerClass="rounded-bl-[32px]"
             />
           </div>

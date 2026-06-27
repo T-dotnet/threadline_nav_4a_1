@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { motion } from "motion/react";
-import { ChevronRight, Calendar, Users, ArrowRight } from "lucide-react";
+import { ChevronRight, Users, ArrowRight } from "lucide-react";
 import { cn } from "../lib/utils";
 import { Child, Page } from "../types";
 import { ProgressBar } from "./ui/ProgressBar";
@@ -10,6 +10,7 @@ import { ActionLink } from "./ui/ActionLink";
 import { Button } from "./ui/Button";
 import { PlanProgressCard } from "./ui/PlanProgressCard";
 import { HeroQuoteCard } from "./ui/HeroQuoteCard";
+import { FirstSessionCard } from "./ui/FirstSessionCard";
 
 import { PageContainer } from "./ui/PageContainer";
 
@@ -38,13 +39,18 @@ export default function AllChildrenPage({
   // Helper to retrieve child-specific premium synthesis quote and progression details
   const getChildSynthesisData = (child: Child) => {
     if (child.isNew) {
+      const sessionDate = child.intake?.sessionDay ? `Thu ${child.intake.sessionDay} Jun` : "Thu 26 Jun";
+      const sessionTime = child.intake?.sessionTime || "4:00 pm";
       return {
         quote: `We're gathering the full picture for ${child.name}. The assessment pages will open after the first session and clinical review.`,
         evidenceLevel: 1,
         evidenceText: "Intake in progress",
         progress: 0,
-        progressText: "assessment pending",
-        nextReview: "Session booked",
+        progressText: "booked — assessment pending",
+        nextReview: sessionDate,
+        sessionDate,
+        sessionTime,
+        documentStatus: "Initial documents uploaded",
         accentColor: "text-amber-600",
         theme: "white",
       };
@@ -112,6 +118,8 @@ export default function AllChildrenPage({
         {childrenList.map((child, index) => {
           const childData = getChildSynthesisData(child);
           const isGreenTheme = childData.theme === "green";
+          const sessionDate = child.intake?.sessionDay ? `Thu ${child.intake.sessionDay} Jun` : "Thu 26 Jun";
+          const sessionTime = child.intake?.sessionTime || "4:00 pm";
 
           return (
             <motion.section
@@ -166,28 +174,16 @@ export default function AllChildrenPage({
                   evidenceVariant={isGreenTheme ? 'green' : 'default'}
                   action={
                     child.isNew ? (
-                      <div className="flex flex-wrap gap-3">
-                        <Button
-                          onClick={() => {
-                            setChild(child);
-                            window.location.href = "/setup";
-                          }}
-                          variant="forest"
-                          rightIcon={<ChevronRight className="w-3.5 h-3.5 stroke-[2]" />}
-                        >
-                          Continue setup
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            setChild(child);
-                            onPageChange("home");
-                          }}
-                          variant="mint"
-                          rightIcon={<ChevronRight className="w-3.5 h-3.5 stroke-[2]" />}
-                        >
-                          Open intake home
-                        </Button>
-                      </div>
+                      <Button
+                        onClick={() => {
+                          setChild(child);
+                          window.location.href = "/setup";
+                        }}
+                        variant="mint"
+                        rightIcon={<ChevronRight className="w-3.5 h-3.5 stroke-[2]" />}
+                      >
+                        Continue setup
+                      </Button>
                     ) : (
                       <Button
                         onClick={() => {
@@ -208,12 +204,16 @@ export default function AllChildrenPage({
                   className="h-auto md:h-[300px]"
                   id={`plan-card-${child.name.toLowerCase()}`}
                 >
-                  <PlanProgressCard
-                    progress={childData.progress}
-                    statusText={childData.progressText}
-                    nextReview={childData.nextReview}
-                    className="rounded-bl-[32px] h-full"
-                  />
+                  {child.isNew ? (
+                    <FirstSessionCard date={sessionDate} time={sessionTime} className="h-full" />
+                  ) : (
+                    <PlanProgressCard
+                      progress={childData.progress}
+                      statusText={childData.progressText}
+                      nextReview={childData.nextReview}
+                      className="rounded-bl-[32px] h-full"
+                    />
+                  )}
                 </div>
 
               </div>

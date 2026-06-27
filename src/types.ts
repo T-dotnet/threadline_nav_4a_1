@@ -1,6 +1,7 @@
-export type Page = 'home' | 'preview' | 'understanding' | 'priorities' | 'roadmap' | 'reviews' | 'resources' | 'documents' | 'settings' | 'emerging-details' | 'all-children' | 'style-guide';
+export type Page = 'home' | 'preview' | 'what-you-noticed' | 'understanding' | 'priorities' | 'roadmap' | 'reviews' | 'resources' | 'documents' | 'settings' | 'emerging-details' | 'all-children' | 'style-guide';
 
 export interface Child {
+  id?: string;
   name: string;
   age: number;
   initial: string;

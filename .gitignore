@@ -6,3 +6,9 @@ coverage/
 *.log
 .env*
 !.env.example
+.codex-local/
+.npm-cache/
+.runtime/
+.vercel-cache/
+.vercel-home/
+correct-threadline-nav-work/

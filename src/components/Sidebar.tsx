@@ -8,6 +8,7 @@ import {
   BookOpen,
   Lock,
   Settings,
+  Search,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -36,6 +37,7 @@ export default function Sidebar({ currentPage, onPageChange }: SidebarProps) {
   ] as const;
   const newChildNavItems = [
     { id: "home", label: "Home", icon: Home },
+    { id: "what-you-noticed", label: "What you noticed", icon: Search },
     { id: "understanding", label: "Understanding", icon: Info },
     { id: "resources", label: "Resources", icon: BookOpen },
   ] as const;

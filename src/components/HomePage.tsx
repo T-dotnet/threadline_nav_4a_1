@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { Check, ChevronRight, Calendar, Plus, Send, Download, Play, Printer, Eye, LineChart, ListTodo, Milestone, Users } from "lucide-react";
+import { Check, ChevronRight, Calendar, Clock, FileText, Plus, Send, Download, Play, Printer, Eye, LineChart, ListTodo, Milestone, Users } from "lucide-react";
 import { cn } from "../lib/utils";
 import React, { useState, useRef } from "react";
 import { Child } from "../types";
@@ -67,9 +67,30 @@ export default function HomePage({
       : "Maya is showing marked improvements in auditory processing, though focus remains heavily tethered to circadian stability.";
   
   const progressValue = isLiam ? 100 : currentChild.isNew ? 0 : 65;
-  const progressStatus = isLiam ? "all goals met — maintenance phase" : currentChild.isNew ? "initial setup — assessment pending" : "on track — steady progress";
-  const nextReview = isLiam ? "12 December" : currentChild.isNew ? "Thu 26 June" : "12 September";
+  const progressStatus = isLiam ? "all goals met — maintenance phase" : currentChild.isNew ? "booked — assessment pending" : "on track — steady progress";
+  const firstSessionDate = currentChild.intake?.sessionDay ? `Thu ${currentChild.intake.sessionDay} June` : "Thu 26 June";
+  const firstSessionTime = currentChild.intake?.sessionTime || "4:00 pm";
+  const nextReview = isLiam ? "12 December" : currentChild.isNew ? firstSessionDate : "12 September";
   const evidenceTag = isLiam ? "Consolidated" : currentChild.isNew ? "Initial" : "Emerging";
+  const sessionDetails = currentChild.isNew
+    ? [
+        {
+          label: "Date",
+          value: firstSessionDate,
+          icon: <Calendar className="w-4 h-4 stroke-[1.8]" />,
+        },
+        {
+          label: "Time",
+          value: firstSessionTime,
+          icon: <Clock className="w-4 h-4 stroke-[1.8]" />,
+        },
+        {
+          label: "Documents",
+          value: "Initial documents uploaded",
+          icon: <FileText className="w-4 h-4 stroke-[1.8]" />,
+        },
+      ]
+    : undefined;
 
   return (
     <motion.div
@@ -119,7 +140,8 @@ export default function HomePage({
               progress={progressValue}
               statusText={progressStatus}
               nextReview={nextReview}
-              title={currentChild.isNew ? "Session" : "This quarter's plan"}
+              title={currentChild.isNew ? "First session" : "This quarter's plan"}
+              details={sessionDetails}
               className="w-full h-full"
             />
           </FadeInScroll>

@@ -1,6 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Check, ChevronRight, X, User, Calendar, Clock, UploadCloud, FileText, Activity, Users, Settings, ArrowRight, ArrowLeft, Upload, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
+import { Check, ChevronRight, User, Calendar, Clock, UploadCloud, FileText, Activity, Users, Settings, ArrowRight, ArrowLeft, Upload, Trash2, ArrowUp, ArrowDown } from 'lucide-react';
 import { useCurrentChild } from '../context/ChildContext';
 import { useLocker } from '../context/LockerContext';
 import { cn } from '../lib/utils';
@@ -12,6 +12,7 @@ import { TimelineStep } from './ui/TimelineStep';
 import { PageIcon } from './ui/PageIcon';
 import { getCompletedQuestionnaireSections } from '../questionnaire';
 import watercolorBg from '../assets/images/watercolor_bg_1782427011739.jpg';
+import clinicianPhoto from '../assets/images/dr-naomi-clark.png';
 
 interface Question {
   id: string;
@@ -199,12 +200,14 @@ interface AddChildFlowProps {
   onComplete: () => void;
   onCancel: () => void;
   asModal?: boolean;
+  initialStep?: StepType;
 }
 
 type StepType = 'welcome' | 1 | 2 | 3 | 4 | 5 | 'done';
 
-export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChildFlowProps) {
+export default function AddChildFlow({ onComplete, onCancel, asModal, initialStep }: AddChildFlowProps) {
   const [step, setStep] = useState<StepType>(() => {
+    if (initialStep) return initialStep;
     try {
       const params = new URLSearchParams(window.location.search);
       const stepParam = params.get('step');
@@ -283,6 +286,7 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
   };
 
   const [selectedTz, setSelectedTz] = useState(detectTimezone());
+  const [isAppointmentCancelled, setIsAppointmentCancelled] = useState(false);
 
   const getConvertedTime = (baseTimeStr: string, targetTz: string) => {
     if (targetTz === 'AEST') return baseTimeStr;
@@ -509,7 +513,7 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
 
   const saveCurrentChildIntake = (nextAnswers = answers) => {
     if (!currentChild.isNew) return;
-    const name = formData.firstName || currentChild.name || 'New Child';
+    const name = formData.firstName.trim() || currentChild.name || 'New child';
     updateChild({
       ...currentChild,
       name,
@@ -540,9 +544,10 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
         });
       });
 
-      const name = formData.firstName || currentChild.name || 'New Child';
+      const name = formData.firstName.trim() || (currentChild.isNew ? currentChild.name : 'New child');
       const child = {
         ...(currentChild.isNew ? currentChild : {}),
+        id: currentChild.isNew ? currentChild.id : undefined,
         name,
         age: currentChild.isNew ? currentChild.age : 9,
         initial: name.charAt(0).toUpperCase(),
@@ -562,6 +567,10 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
   };
 
   const handleBack = () => {
+    if (hideStepperForDirectModalStep) {
+      onCancel();
+      return;
+    }
     if (step === 1) setStep('welcome');
     else if (step === 2) setStep(1);
     else if (step === 3) setStep(2);
@@ -592,61 +601,82 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
   const times = ['9:00 am', '10:30 am', '1:00 pm', '4:00 pm'];
   const completedQuestionnaireSections = getCompletedQuestionnaireSections(answers);
   const remainingQuestionnaireSections = Math.max(0, Object.keys(QUESTIONS).length - completedQuestionnaireSections.length);
+  const isDirectSessionModal = asModal && initialStep === 3;
+  const hideStepperForDirectModalStep = isDirectSessionModal || (asModal && initialStep === 5);
+  const sectionKickerClass = "text-[0.75rem] tracking-[0.1em] uppercase text-[var(--color-thread-mid-green)] font-medium mb-3 block";
+  const stepHeadingClass = "font-serif font-normal text-[2rem] sm:text-[2.35rem] leading-[1.12] tracking-tight text-[var(--color-thread-heading)] mb-3 max-w-[14ch]";
+  const stepLeadClass = "text-[0.98rem] text-[var(--color-thread-gray)] leading-relaxed max-w-[55ch]";
+  const selectClass = "w-full py-3 px-4 pr-9 bg-[var(--color-thread-off-white)]/50 border border-black/10 rounded-xl text-[0.95rem] font-medium text-[var(--color-thread-dark-slate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-thread-mid-green)]/20 focus:border-[var(--color-thread-mid-green)]/30 transition-all appearance-none cursor-pointer";
+  const smallFieldLabelClass = "text-[0.66rem] tracking-[0.12em] uppercase text-[var(--color-thread-gray)] font-medium mb-1.5 block";
+  const choiceClass = (selected: boolean) => cn(
+    "px-5 py-2.5 rounded-full text-[0.84rem] font-medium transition-all border shadow-none cursor-pointer inline-flex items-center gap-2 min-h-[40px]",
+    selected
+      ? "bg-[var(--color-thread-light-green)] border-transparent text-[var(--color-thread-heading)]"
+      : "bg-white border-black/10 text-[var(--color-thread-gray)] hover:border-black/20 hover:text-[var(--color-thread-heading)]"
+  );
+  const questionOptionClass = (selected: boolean) => cn(
+    "w-full p-4 rounded-tr-[20px] border text-left flex items-center justify-between group transition-all duration-200 cursor-pointer shadow-none",
+    selected
+      ? "bg-[var(--color-thread-light-green)] border-[var(--color-thread-mid-green)]/30 text-[var(--color-thread-heading)] font-medium"
+      : "bg-white border-black/10 text-[var(--color-thread-dark-slate)] hover:border-black/20 hover:bg-[var(--color-thread-off-white)]/60"
+  );
+  const renderSetupStepper = (activeStep: number, heading: string) => (
+    <>
+      <div className="text-[0.75rem] tracking-[0.1em] uppercase text-[var(--color-thread-mid-green)] font-medium mb-8">
+        {heading}
+      </div>
+      <div className="space-y-6 relative before:absolute before:left-3.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-black/5">
+        {steps.map((s) => {
+          const isPast = activeStep > s.num;
+          const isCurrent = activeStep === s.num;
+          return (
+            <div key={s.num} className="flex gap-4 relative z-10">
+              <div className={cn(
+                "w-7 h-7 rounded-full flex items-center justify-center text-[0.72rem] font-medium border-2 transition-colors bg-[var(--color-thread-off-white)]",
+                isPast ? "bg-[var(--color-thread-mid-green)] border-[var(--color-thread-mid-green)] text-white" :
+                isCurrent ? "border-[var(--color-thread-mid-green)] text-[var(--color-thread-mid-green)] bg-[var(--color-thread-light-green)] shadow-[0_0_0_4px_var(--color-thread-light-green)]" :
+                "border-slate-200 text-slate-400 bg-white"
+              )}>
+                {isPast ? <Check className="w-3.5 h-3.5" /> : s.num}
+              </div>
+              <div>
+                <div className={cn(
+                  "text-[0.92rem] font-medium mb-0.5 transition-colors",
+                  isCurrent || isPast ? "text-[var(--color-thread-heading)]" : "text-slate-400"
+                )}>{s.title}</div>
+                <div className={cn(
+                  "text-[0.78rem] transition-colors",
+                  isCurrent ? "text-slate-500" : "text-slate-400"
+                )}>{s.desc}</div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
 
   return (
     <>
       {asModal && (
-        <div className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm" onClick={onCancel} />
+        <div className="fixed inset-0 z-40 bg-watercolor bg-fixed" onClick={onCancel} />
       )}
       <div className={cn(
         "font-sans flex flex-col",
         asModal
-          ? "fixed inset-0 z-50 overflow-hidden"
+          ? "fixed inset-0 z-50 overflow-hidden bg-watercolor bg-fixed"
           : "min-h-screen bg-watercolor bg-fixed relative"
       )}>
-      {/* Top Bar */}
-      <div className={cn(
-        "bg-white/95 backdrop-blur-md border-b border-black/5",
-        !asModal && "sticky top-0 z-50"
-      )}>
-        <div className="max-w-5xl mx-auto px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-2.5 font-serif font-medium text-lg text-[var(--color-thread-heading)]">
-            <div className="w-8 h-8 rounded-full bg-[var(--color-thread-heading)] text-white flex items-center justify-center">
-              <span className="text-sm">T</span>
-            </div>
-            Threadline
-          </div>
-          
-          <div className="flex items-center gap-6">
-            <span className="text-sm text-slate-500 font-medium">
-              {step === 'welcome' && 'Welcome'}
-              {step === 'done' && 'Setup complete'}
-              {typeof step === 'number' && `Step ${step} of 5`}
-            </span>
-            <button 
-              onClick={onCancel} 
-              className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-black/5 transition-colors cursor-pointer"
-              aria-label="Close setup"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
-        {/* Progress bar */}
-        <div className="h-1 bg-black/5">
-          <div 
-            className="h-full bg-[var(--color-thread-mid-green)] transition-all duration-500"
-            style={{ width: step === 'welcome' ? '0%' : step === 'done' ? '100%' : `${(step as number) / 5 * 100}%` }}
-          />
-        </div>
-      </div>
-
       {/* Main Container */}
       <div className={cn(
         "flex-1 w-full bg-transparent px-4 sm:px-6 md:px-8 flex items-start justify-center",
         asModal ? "overflow-y-auto py-8" : "py-8 sm:py-12 md:py-16"
       )}>
-        <div className="max-w-5xl w-full bg-white rounded-3xl md:rounded-none md:rounded-tr-[48px] shadow-premium border border-black/5 flex flex-col md:flex-row overflow-hidden min-h-[640px]">
+        <div className="max-w-5xl w-full bg-white rounded-tr-[36px] shadow-premium border border-black/5 flex flex-col md:flex-row overflow-hidden min-h-[640px] relative">
+          <div
+            className="absolute left-0 top-0 h-1 bg-[var(--color-thread-mid-green)] transition-all duration-500 z-10"
+            style={{ width: step === 'welcome' ? '0%' : step === 'done' ? '100%' : `${(step as number) / 5 * 100}%` }}
+          />
           
           {/* WELCOME STATE */}
           {step === 'welcome' && (
@@ -655,131 +685,76 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
               <div className="w-full md:w-3/5 p-8 sm:p-12 md:p-14 flex flex-col justify-between gap-10">
                 <div className="space-y-8">
                   <div>
-                    <span className="text-[0.7rem] font-bold tracking-[0.1em] uppercase text-[var(--color-thread-mid-green)] mb-4 block">Welcome to Threadline</span>
-                    <h1 className="font-serif font-normal text-3xl md:text-4xl leading-[1.15] tracking-tight mb-4 text-[var(--color-thread-heading)]">Let's set up Threadline for your family.</h1>
-                    <p className="text-slate-500 text-[1.05rem] leading-relaxed max-w-[42ch]">A few short steps to get ready for your first session. It takes about ten minutes, and you can pause and pick up anytime — your progress is saved.</p>
+                    <span className={sectionKickerClass}>Welcome to Threadline</span>
+                    <h1 className={stepHeadingClass}>Let's set up Threadline for your family.</h1>
+                    <p className={stepLeadClass}>A few short steps to get ready for your first session. It takes about ten minutes, and you can pause and pick up anytime — your progress is saved.</p>
                   </div>
                   
-                  <div className="bg-[var(--color-thread-off-white)] p-5 rounded-2xl flex items-start gap-4">
+                  <div className="bg-[var(--color-thread-off-white)]/70 p-5 rounded-tr-[24px] flex items-start gap-4">
                     <div className="w-10 h-10 rounded-full bg-[var(--color-thread-light-green)] flex items-center justify-center flex-shrink-0 text-[var(--color-thread-mid-green)]">
                       <User className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="font-semibold text-slate-900 mb-1">A clinician leads everything</h4>
-                      <p className="text-sm text-slate-500 leading-relaxed">Your session is led by a registered clinician, and they review every result before you see it. Threadline does the structured work behind the scenes — a person is always accountable for your care.</p>
+                      <h4 className="font-medium text-[var(--color-thread-heading)] mb-1">A clinician leads everything</h4>
+                      <p className="text-[0.92rem] text-[var(--color-thread-gray)] leading-relaxed">Your session is led by a registered clinician, and they review every result before you see it. Threadline does the structured work behind the scenes — a person is always accountable for your care.</p>
                     </div>
                   </div>
                 </div>
 
-                <div>
-                  <Button onClick={handleNext} variant="forest" className="text-[0.95rem] px-8 py-4 shadow-none w-full sm:w-auto">
-                    Begin setup <ArrowRight className="w-5 h-5 ml-2" />
+                <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
+                  <Button
+                    onClick={onCancel}
+                    variant="muted"
+                    className="text-[0.95rem] px-8 py-4 shadow-none w-full sm:w-auto"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleNext}
+                    variant="forest"
+                    className="text-[0.95rem] px-8 py-4 shadow-none w-full sm:w-auto"
+                    rightIcon={<ArrowRight className="w-5 h-5" />}
+                  >
+                    Begin setup
                   </Button>
                 </div>
               </div>
 
-              {/* Right Column: Timeline Step Overview */}
-              <div className="w-full md:w-2/5 bg-transparent p-8 sm:p-10 border-t md:border-t-0 md:border-l border-black/5 flex flex-col justify-center">
-                <span className="text-[0.75rem] font-bold tracking-[0.1em] uppercase text-[var(--color-thread-mid-green)] mb-6 block">What we'll do together</span>
-                <div className="relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-black/5">
-                  <TimelineStep
-                    title="Add your child"
-                    meta="Basic details"
-                    metaTag="Step 1"
-                    description="Their name and date of birth."
-                    active
-                  />
-                  <TimelineStep
-                    title="Share what you've noticed"
-                    meta="Areas on your mind"
-                    metaTag="Step 2"
-                    description="The areas on your mind, in your own words."
-                    todo
-                  />
-                  <TimelineStep
-                    title="Book your session"
-                    meta="Schedule"
-                    metaTag="Step 3"
-                    description="A clinician-led video call that suits you."
-                    todo
-                  />
-                  <TimelineStep
-                    title="Answer the questionnaire"
-                    meta="Guided questions"
-                    metaTag="Step 4"
-                    description="Guided questions about everyday life."
-                    todo
-                  />
-                  <TimelineStep
-                    title="Add helpful documents"
-                    meta="Optional"
-                    metaTag="Step 5"
-                    description="Reports or notes, if you have them."
-                    todo
-                  />
-                </div>
-              </div>
+              {/* Right Column: Setup Stepper */}
+              <aside className="order-2 w-full md:w-72 bg-transparent p-8 sm:p-10 border-t md:border-t-0 md:border-l border-black/5 flex-shrink-0 flex flex-col justify-start">
+                {renderSetupStepper(1, "What we'll do together")}
+              </aside>
             </>
           )}
 
           {/* ACTIVE STEPS 1-5 */}
           {typeof step === 'number' && (
             <>
-              {/* Left Column: Interactive Sidebar Progress */}
-              {true && (
-                <aside className="w-full md:w-72 bg-transparent p-8 sm:p-10 border-b md:border-b-0 md:border-r border-black/5 flex-shrink-0 flex flex-col">
-                  <div className="font-sans font-semibold text-lg text-[var(--color-thread-heading)] tracking-tight mb-8">
-                    {formData.firstName || 'Your child'}'s setup
-                  </div>
-                  <div className="space-y-6 relative before:absolute before:left-3.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-black/5">
-                    {steps.map((s) => {
-                      const isPast = step > s.num;
-                      const isCurrent = step === s.num;
-                      return (
-                        <div key={s.num} className="flex gap-4 relative z-10">
-                          <div className={cn(
-                            "w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold border-2 transition-colors bg-[var(--color-thread-off-white)]",
-                            isPast ? "bg-[var(--color-thread-mid-green)] border-[var(--color-thread-mid-green)] text-white" :
-                            isCurrent ? "border-[var(--color-thread-mid-green)] text-[var(--color-thread-mid-green)] bg-[var(--color-thread-light-green)] shadow-[0_0_0_4px_var(--color-thread-light-green)]" :
-                            "border-slate-200 text-slate-400 bg-white"
-                          )}>
-                            {isPast ? <Check className="w-3.5 h-3.5" /> : s.num}
-                          </div>
-                          <div>
-                            <div className={cn(
-                              "text-sm font-semibold mb-0.5 transition-colors",
-                              isCurrent || isPast ? "text-[var(--color-thread-heading)]" : "text-slate-400"
-                            )}>{s.title}</div>
-                            <div className={cn(
-                              "text-xs transition-colors",
-                              isCurrent ? "text-slate-500" : "text-slate-400"
-                            )}>{s.desc}</div>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
+              {/* Right Column: Interactive Sidebar Progress */}
+              {!hideStepperForDirectModalStep && (
+                <aside className="order-2 w-full md:w-72 bg-transparent p-8 sm:p-10 border-t md:border-t-0 md:border-l border-black/5 flex-shrink-0 flex flex-col">
+                  {renderSetupStepper(step, `${formData.firstName || 'Your child'}'s setup`)}
                 </aside>
               )}
 
-              {/* Right Column: Step content & in-card action buttons */}
-              <main className="flex-1 p-8 sm:p-12 md:p-14 flex flex-col justify-between min-h-[500px]">
+              {/* Step content & in-card action buttons */}
+              <main className="order-1 flex-1 p-8 sm:p-12 md:p-14 flex flex-col justify-between min-h-[500px]">
                 <div className="w-full">
                   
                   {/* Step 1 */}
                   {step === 1 && (
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
                       <div>
-                        <span className="text-xs font-bold tracking-[0.1em] uppercase text-[var(--color-thread-mid-green)] mb-3 block">Step 1 of 5 · Your child</span>
-                        <h1 className="font-serif font-normal text-3xl text-[var(--color-thread-heading)] mb-2">Add your child</h1>
-                        <p className="text-slate-500 text-[0.95rem]">Start with the basics — who we're supporting and how you're related to them.</p>
+                        <span className={sectionKickerClass}>Step 1 of 5 · Your child</span>
+                        <h1 className={stepHeadingClass}>Add your child</h1>
+                        <p className={stepLeadClass}>Start with the basics — who we're supporting and how you're related to them.</p>
                       </div>
                       
                       <div className="space-y-6">
                         <div>
                           <Label>Child's first name</Label>
                           <Input 
-                            placeholder="e.g. Maya" 
+                            placeholder="e.g. Alex"
                             value={formData.firstName}
                             onChange={(e) => setFormData({...formData, firstName: e.target.value})}
                             className="max-w-md py-3 bg-white"
@@ -789,12 +764,12 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                           <Label className="mb-2 block">Date of birth</Label>
                           <div className="flex gap-3 max-w-md">
                             <div className="flex-[1]">
-                              <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase mb-1.5 block">Day</span>
+                              <span className={smallFieldLabelClass}>Day</span>
                               <div className="relative">
                                 <select
                                   value={getDobParts().day}
                                   onChange={(e) => handleDobChange('day', e.target.value)}
-                                  className="w-full py-2.5 pl-3 pr-8 bg-white border border-black/15 rounded-xl text-sm text-[var(--color-thread-dark-slate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-thread-mid-green)]/20 focus:border-[var(--color-thread-mid-green)] transition-all appearance-none cursor-pointer"
+                                  className={selectClass}
                                 >
                                   <option value="">DD</option>
                                   {daysArray.map(d => (
@@ -807,12 +782,12 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                               </div>
                             </div>
                             <div className="flex-[2]">
-                              <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase mb-1.5 block">Month</span>
+                              <span className={smallFieldLabelClass}>Month</span>
                               <div className="relative">
                                 <select
                                   value={getDobParts().month}
                                   onChange={(e) => handleDobChange('month', e.target.value)}
-                                  className="w-full py-2.5 pl-3 pr-8 bg-white border border-black/15 rounded-xl text-sm text-[var(--color-thread-dark-slate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-thread-mid-green)]/20 focus:border-[var(--color-thread-mid-green)] transition-all appearance-none cursor-pointer"
+                                  className={selectClass}
                                 >
                                   <option value="">Month</option>
                                   {monthsArray.map(m => (
@@ -825,12 +800,12 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                               </div>
                             </div>
                             <div className="flex-[1.5]">
-                              <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase mb-1.5 block">Year</span>
+                              <span className={smallFieldLabelClass}>Year</span>
                               <div className="relative">
                                 <select
                                   value={getDobParts().year}
                                   onChange={(e) => handleDobChange('year', e.target.value)}
-                                  className="w-full py-2.5 pl-3 pr-8 bg-white border border-black/15 rounded-xl text-sm text-[var(--color-thread-dark-slate)] focus:outline-none focus:ring-2 focus:ring-[var(--color-thread-mid-green)]/20 focus:border-[var(--color-thread-mid-green)] transition-all appearance-none cursor-pointer"
+                                  className={selectClass}
                                 >
                                   <option value="">YYYY</option>
                                   {yearsArray.map(y => (
@@ -852,10 +827,7 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                                 key={rel}
                                 onClick={() => setFormData({...formData, relation: rel})}
                                 className={cn(
-                                  "px-5 py-2.5 rounded-full text-sm font-medium transition-all border shadow-none cursor-pointer",
-                                  formData.relation === rel 
-                                    ? "bg-[var(--color-thread-light-green)] border-transparent text-[var(--color-thread-heading)] font-semibold"
-                                    : "bg-white border-black/10 text-slate-600 hover:border-black/20"
+                                  choiceClass(formData.relation === rel)
                                 )}
                               >
                                 {rel}
@@ -871,9 +843,9 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                   {step === 2 && (
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
                       <div>
-                        <span className="text-xs font-bold tracking-[0.1em] uppercase text-[var(--color-thread-mid-green)] mb-3 block">Step 2 of 5 · What you notice</span>
-                        <h1 className="font-serif font-normal text-3xl text-[var(--color-thread-heading)] mb-2">What you're noticing</h1>
-                        <p className="text-slate-500 text-[0.95rem]">There are no wrong answers — the areas you flag and anything you add in your own words help your clinician prepare for {formData.firstName || 'your child'}'s session.</p>
+                        <span className={sectionKickerClass}>Step 2 of 5 · What you notice</span>
+                        <h1 className={stepHeadingClass}>What you're noticing</h1>
+                        <p className={stepLeadClass}>There are no wrong answers — the areas you flag and anything you add in your own words help your clinician prepare for {formData.firstName || 'your child'}'s session.</p>
                       </div>
 
                       <div className="space-y-8">
@@ -892,10 +864,7 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                                     setFormData({...formData, notices: newNotices});
                                   }}
                                   className={cn(
-                                    "px-4 py-2 rounded-full text-sm font-medium transition-all border flex items-center gap-2 shadow-none cursor-pointer",
-                                    isSelected 
-                                      ? "bg-[var(--color-thread-light-green)] border-transparent text-[var(--color-thread-heading)] font-semibold"
-                                      : "bg-white border-black/10 text-slate-600 hover:border-black/20"
+                                    choiceClass(isSelected)
                                   )}
                                 >
                                   {opt}
@@ -909,7 +878,7 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                         <div>
                           <Label className="mb-3">Anything in your own words? <span className="text-slate-400 font-normal ml-2">optional</span></Label>
                           <textarea 
-                            className="w-full min-h-[120px] p-4 rounded-xl border border-black/10 bg-white text-[0.95rem] text-[var(--color-thread-dark-slate)] placeholder:text-[var(--color-thread-placeholder)] focus:outline-none focus:ring-2 focus:ring-[var(--color-thread-mid-green)]/20 focus:border-[var(--color-thread-mid-green)]/30 transition-all resize-y shadow-none"
+                            className="w-full min-h-[120px] p-4 rounded-tr-[24px] border border-black/10 bg-[var(--color-thread-off-white)]/50 text-[0.95rem] text-[var(--color-thread-dark-slate)] placeholder:text-[var(--color-thread-placeholder)] focus:outline-none focus:ring-2 focus:ring-[var(--color-thread-mid-green)]/20 focus:border-[var(--color-thread-mid-green)]/30 transition-all resize-y shadow-none"
                             placeholder="Write as much or as little as you like..."
                             value={formData.notes}
                             onChange={(e) => setFormData({...formData, notes: e.target.value})}
@@ -923,17 +892,20 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                   {step === 3 && (
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
                       <div>
-                        <span className="text-xs font-bold tracking-[0.1em] uppercase text-[var(--color-thread-mid-green)] mb-3 block">Step 3 of 5 · Your session</span>
-                        <h1 className="font-serif font-normal text-3xl text-[var(--color-thread-heading)] mb-2">Book your session</h1>
-                        <p className="text-slate-500 text-[0.95rem]">One structured video call with a clinician. Pick a time that works — you can reschedule later if you need to.</p>
+                        <span className={sectionKickerClass}>Step 3 of 5 · Your session</span>
+                        <h1 className={stepHeadingClass}>Book your session</h1>
+                        <p className={stepLeadClass}>One structured video call with a clinician. Pick a time that works — you can reschedule later if you need to.</p>
                       </div>
 
-                      <div className="bg-[var(--color-thread-off-white)] p-5 rounded-2xl shadow-none flex items-start gap-4">
-                        <div className="w-12 h-12 rounded-full bg-[var(--color-thread-heading)] flex items-center justify-center flex-shrink-0 text-white font-serif text-lg">
-                          NC
-                        </div>
+                      <div className="bg-[var(--color-thread-off-white)]/70 p-5 rounded-tr-[24px] shadow-none flex items-start gap-4">
+                        <img
+                          src={clinicianPhoto}
+                          alt="Dr. Naomi Clark"
+                          className="w-16 h-16 rounded-full object-cover flex-shrink-0 border border-black/5 shadow-sm"
+                          referrerPolicy="no-referrer"
+                        />
                         <div>
-                          <h4 className="font-semibold text-slate-900">Dr. Naomi Clark</h4>
+                          <h4 className="font-medium text-[var(--color-thread-heading)]">Dr. Naomi Clark</h4>
                           <p className="text-xs text-slate-400 mb-2">Consultant Child Psychologist · PhD, MAPS</p>
                           <p className="text-xs text-slate-500 leading-relaxed max-w-md">Dr Clark specializes in developmental profiles and child-centered environments. She leads the review of {formData.firstName || 'your child'}'s profile and works with your family.</p>
                         </div>
@@ -948,10 +920,10 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                                 key={d.num}
                                 onClick={() => setFormData({...formData, sessionDay: d.num, sessionTime: ''})}
                                 className={cn(
-                                  "w-[4.5rem] py-3 rounded-xl flex flex-col items-center justify-center border transition-all shadow-none cursor-pointer hover:scale-[1.02]",
+                                  "w-[4.5rem] py-3 rounded-tr-[20px] flex flex-col items-center justify-center border transition-all shadow-none cursor-pointer",
                                   formData.sessionDay === d.num
                                     ? "bg-[var(--color-thread-light-green)] border-transparent text-[var(--color-thread-heading)] font-semibold scale-[1.02]"
-                                    : "bg-white border-black/10 text-slate-600 hover:border-black/20"
+                                    : "bg-white border-black/10 text-slate-600 hover:border-black/20 hover:bg-[var(--color-thread-off-white)]/60"
                                 )}
                               >
                                 <span className={cn("text-[0.66rem] uppercase tracking-wider mb-1 transition-colors", formData.sessionDay === d.num ? "text-[var(--color-thread-mid-green)] font-semibold" : "text-slate-400")}>{d.dow}</span>
@@ -967,12 +939,12 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                               <Label className="mb-0">Choose a time</Label>
                               <div className="flex items-center gap-2">
-                                <span className="text-[11px] font-bold tracking-wider text-slate-400 uppercase">Your Timezone:</span>
+                                <span className={smallFieldLabelClass}>Your timezone</span>
                                 <div className="relative">
                                   <select
                                     value={selectedTz}
                                     onChange={(e) => setSelectedTz(e.target.value)}
-                                    className="text-xs font-semibold py-1.5 pl-2.5 pr-8 bg-white border border-black/10 rounded-lg text-slate-600 focus:outline-none focus:ring-1 focus:ring-[var(--color-thread-mid-green)] focus:border-[var(--color-thread-mid-green)] transition-all appearance-none cursor-pointer"
+                                    className="text-[0.78rem] font-medium py-1.5 pl-2.5 pr-8 bg-white border border-black/10 rounded-full text-slate-600 focus:outline-none focus:ring-2 focus:ring-[var(--color-thread-mid-green)]/20 focus:border-[var(--color-thread-mid-green)]/30 transition-all appearance-none cursor-pointer"
                                   >
                                     <option value="AEST">AEST / AEDT</option>
                                     <option value="ACST">ACST / ACDT</option>
@@ -992,10 +964,10 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                                     key={t}
                                     onClick={() => setFormData({...formData, sessionTime: t})}
                                     className={cn(
-                                      "px-5 py-2.5 rounded-2xl text-sm font-medium transition-all border shadow-none cursor-pointer flex flex-col items-center justify-center gap-0.5 min-w-[5.5rem]",
+                                      "px-5 py-2.5 rounded-tr-[20px] text-sm font-medium transition-all border shadow-none cursor-pointer flex flex-col items-center justify-center gap-0.5 min-w-[5.5rem]",
                                       formData.sessionTime === t
                                         ? "bg-[var(--color-thread-light-green)] border-transparent text-[var(--color-thread-heading)] font-semibold"
-                                        : "bg-white border-black/10 text-slate-600 hover:border-black/20"
+                                        : "bg-white border-black/10 text-slate-600 hover:border-black/20 hover:bg-[var(--color-thread-off-white)]/60"
                                     )}
                                   >
                                     <span className="font-semibold text-[0.92rem]">{converted}</span>
@@ -1010,10 +982,27 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                         )}
                       </div>
 
-                      <div className="bg-[var(--color-thread-off-white)] p-5 rounded-xl text-slate-600 text-sm flex gap-3.5">
+                      <div className="bg-[var(--color-thread-off-white)]/70 p-5 rounded-br-[24px] text-slate-600 text-sm flex gap-3.5">
                         <Clock className="w-5 h-5 text-[var(--color-thread-mid-green)] flex-shrink-0 mt-0.5" />
-                        <div>A <span className="font-semibold">45-minute telehealth session</span> — a structured interview, some gentle observation, and a few short tasks for {formData.firstName || 'Maya'}. Join from home.</div>
+                        <div>A <span className="font-semibold">45-minute telehealth session</span> — a structured interview, some gentle observation, and a few short tasks for {formData.firstName || 'your child'}. Join from home.</div>
                       </div>
+
+                      {isDirectSessionModal && (
+                        <div className="border-t border-black/5 pt-5 flex flex-col sm:flex-row sm:items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => setIsAppointmentCancelled(true)}
+                            className="w-full sm:w-auto px-5 py-2.5 rounded-full border border-rose-200 bg-white text-rose-600 hover:bg-rose-50 text-sm font-semibold transition-all cursor-pointer"
+                          >
+                            Cancel appointment
+                          </button>
+                          {isAppointmentCancelled && (
+                            <div className="text-xs font-medium text-[var(--color-thread-mid-green)] bg-[var(--color-thread-light-green)] px-3.5 py-2 rounded-full">
+                              Appointment cancelled. You can choose a new time when ready.
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </motion.div>
                   )}
 
@@ -1022,9 +1011,9 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
                       {true && (
                         <div>
-                          <span className="text-[0.7rem] font-bold tracking-[0.1em] uppercase text-[var(--color-thread-mid-green)] mb-4 block">Step 4 of 5 · Questionnaire</span>
-                          <h1 className="font-sans font-medium text-3xl text-[var(--color-thread-heading)] mb-2">Everyday life & environment</h1>
-                          <p className="text-slate-500 text-[1.05rem] leading-relaxed max-w-[42ch]">A comprehensive view of {formData.firstName || 'Maya'}'s world — from routines to school life. A clinician reviews every answer before your session.</p>
+                          <span className={sectionKickerClass}>Step 4 of 5 · Questionnaire</span>
+                          <h1 className={stepHeadingClass}>Everyday life & environment</h1>
+                          <p className={stepLeadClass}>A comprehensive view of {formData.firstName || 'your child'}'s world — from routines to school life. A clinician reviews every answer before your session.</p>
                         </div>
                       )}
 
@@ -1045,27 +1034,40 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                             const progressPercent = Math.round((answeredQuestionsCount / totalQuestionsCount) * 100);
 
                             return (
-                              <div className="bg-[var(--color-thread-off-white)] p-5 rounded-2xl shadow-none flex items-center gap-4 mb-6">
-                                <div className="w-12 h-12 rounded-full border-4 border-[var(--color-thread-mid-green)]/15 bg-white flex items-center justify-center relative flex-shrink-0">
-                                  {/* Beautiful dynamic progress percentage visual indicator */}
-                                  <svg className="w-full h-full transform -rotate-90 absolute">
+                              <div className="bg-[var(--color-thread-off-white)]/70 p-5 rounded-tr-[24px] shadow-none flex items-center gap-4 mb-6">
+                                <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center relative flex-shrink-0">
+                                  <svg
+                                    className="w-full h-full -rotate-90 absolute inset-0"
+                                    viewBox="0 0 48 48"
+                                    aria-hidden="true"
+                                  >
                                     <circle
                                       cx="24"
                                       cy="24"
                                       r="18"
                                       stroke="var(--color-thread-mid-green)"
-                                      strokeWidth="3.5"
+                                      strokeOpacity="0.15"
+                                      strokeWidth="4"
                                       fill="transparent"
+                                    />
+                                    <circle
+                                      cx="24"
+                                      cy="24"
+                                      r="18"
+                                      stroke="var(--color-thread-mid-green)"
+                                      strokeWidth="4"
+                                      fill="transparent"
+                                      strokeLinecap="round"
                                       strokeDasharray={2 * Math.PI * 18}
-                                      strokeDashoffset={2 * Math.PI * 18 * (1 - (progressPercent || 1) / 100)}
+                                      strokeDashoffset={2 * Math.PI * 18 * (1 - progressPercent / 100)}
                                       className="transition-all duration-500"
                                     />
                                   </svg>
-                                  <span className="text-[11px] font-bold text-slate-700 z-10">{progressPercent}%</span>
+                                  <span className="text-[0.72rem] font-medium text-[var(--color-thread-heading)] z-10">{progressPercent}%</span>
                                 </div>
                                 <div>
-                                  <div className="font-semibold text-slate-900 text-sm mb-0.5">{completedSectionsCount} of 4 sections completed</div>
-                                  <div className="text-xs text-slate-400">{answeredQuestionsCount} of {totalQuestionsCount} questions answered. Progress is saved.</div>
+                                  <div className="font-medium text-[var(--color-thread-heading)] text-[0.92rem] mb-0.5">{completedSectionsCount} of 4 sections completed</div>
+                                  <div className="text-[0.78rem] text-[var(--color-thread-gray)]">{answeredQuestionsCount} of {totalQuestionsCount} questions answered. Progress is saved.</div>
                                 </div>
                               </div>
                             );
@@ -1089,10 +1091,10 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                                 }}
                                 disabled={isLocked}
                                 className={cn(
-                                  "w-full bg-white p-6 rounded-2xl border shadow-sm flex items-center gap-5 text-left transition-all group",
+                                  "w-full bg-white p-6 rounded-tr-[24px] flex items-center gap-5 text-left transition-all group",
                                   isLocked
-                                    ? "border-black/5 opacity-50 cursor-not-allowed"
-                                    : "border-black/5 hover:border-[var(--color-thread-mid-green)] hover:shadow-premium-hover hover:bg-slate-50/50 cursor-pointer"
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : "hover:bg-[var(--color-thread-off-white)]/40 cursor-pointer"
                                 )}
                               >
                                 <div className={cn(
@@ -1105,24 +1107,26 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                                 )}>
                                   {isDone ? <Check className="w-4 h-4" /> : isLocked ? <span className="text-slate-300">🔒</span> : i + 1}
                                 </div>
-                                  <div className="flex-1">
-                                    <div className={cn("font-sans font-medium text-lg leading-tight", isLocked ? "text-slate-400" : "text-slate-900")}>{sec}</div>
-                                    <div className="text-xs text-slate-500 mt-1.5 leading-relaxed">
+                                  <div className="flex-1 min-w-0">
+                                    <div className={cn("font-sans font-medium text-[1.12rem] tracking-tight leading-[1.3]", isLocked ? "text-slate-400" : "text-[var(--color-thread-dark-slate)]")}>{sec}</div>
+                                    <div className="text-[0.78rem] text-[var(--color-thread-gray)] mt-1.5 leading-relaxed">
                                       {isLocked
                                         ? `Complete "${['Home & family', 'Daily routines', 'At school', 'Development & history'][i - 1]}" to unlock`
-                                        : `Tell us about ${formData.firstName || 'Maya'}'s everyday life · ${qCount} questions`}
+                                        : `Tell us about ${formData.firstName || 'your child'}'s everyday life · ${qCount} questions`}
                                     </div>
-                                    {!isLocked && (
-                                      <div className={cn(
-                                        "text-[10px] font-bold mt-2.5 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full uppercase tracking-wider",
-                                        isDone ? "bg-[var(--color-thread-light-green)] text-[var(--color-thread-mid-green)]" : status === 'Not started' ? "bg-slate-100 text-slate-400" : "bg-amber-50 text-amber-600"
-                                      )}>
-                                        {isDone && <Check className="w-3 h-3" />}
-                                        {isDone ? 'Completed' : isInProgress ? status : 'Start section →'}
-                                      </div>
-                                    )}
                                   </div>
-                                {!isLocked && <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-slate-500 transition-colors" />}
+                                {!isLocked && (
+                                  <div className="flex items-center gap-3 shrink-0">
+                                    <div className={cn(
+                                      "text-[0.6rem] font-medium inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full uppercase tracking-[0.12em] whitespace-nowrap",
+                                      isDone ? "bg-[var(--color-thread-light-green)] text-[var(--color-thread-mid-green)]" : status === 'Not started' ? "bg-[var(--color-thread-off-white)] text-slate-400" : "bg-[var(--color-thread-cream)] text-[var(--color-thread-heading)]"
+                                    )}>
+                                      {isDone && <Check className="w-3 h-3" />}
+                                      {isDone ? 'Completed' : isInProgress ? status : 'Start section'}
+                                    </div>
+                                    <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-slate-500 transition-colors" />
+                                  </div>
+                                )}
                               </button>
                             );
                           })}
@@ -1147,28 +1151,32 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 10, scale: 0.97 }}
                         transition={{ duration: 0.3 }}
-                        className="relative z-10 w-full max-w-2xl bg-white rounded-3xl shadow-[0_32px_80px_-12px_rgba(0,0,0,0.18)] border border-black/5 flex flex-col max-h-[90vh] overflow-hidden"
+                        className="relative z-10 w-full max-w-2xl bg-white rounded-tr-[36px] shadow-modal border border-black/5 flex flex-col max-h-[90vh] overflow-hidden"
                       >
                         <div className="flex flex-col h-full justify-between min-h-[480px]">
                           {/* Header / Nav-back */}
                           <div className="flex items-center justify-between p-6 pb-5 border-b border-black/5">
-                            <button
-                              onClick={() => {
-                                saveCurrentChildIntake();
-                                setQSection(null);
-                                setIsModalOpen(false);
-                              }}
-                              className="text-xs font-bold uppercase tracking-wider text-[var(--color-thread-mid-green)] hover:text-[var(--color-thread-heading)] flex items-center gap-1.5 cursor-pointer transition-colors"
-                            >
-                              <ArrowLeft className="w-4 h-4" /> Save & Exit Section
-                            </button>
-                            <span className="text-xs font-semibold text-slate-400 uppercase tracking-tight">
+                            {!isReviewing ? (
+                              <button
+                                onClick={() => {
+                                  saveCurrentChildIntake();
+                                  setQSection(null);
+                                  setIsModalOpen(false);
+                                }}
+                                className="text-[0.84rem] text-[var(--color-thread-dark-slate)] font-medium border-b border-[var(--color-thread-dark-slate)] pb-0.5 hover:opacity-70 transition-all min-h-[32px] inline-flex items-center cursor-pointer"
+                              >
+                                Save & exit section
+                              </button>
+                            ) : (
+                              <div className="min-h-[32px] w-[140px]" />
+                            )}
+                            <span className="text-[0.75rem] font-medium text-slate-400 uppercase tracking-[0.1em]">
                               {qSection}
                             </span>
                           </div>
 
                           {/* Main Body */}
-                          <div className="flex-1 py-8 px-6 sm:px-10 flex flex-col justify-center overflow-y-auto">
+                          <div className="flex-1 py-8 px-6 sm:px-10 flex flex-col justify-start overflow-y-auto">
                             <AnimatePresence mode="wait">
                               {!isReviewing ? (
                                 <motion.div
@@ -1191,13 +1199,13 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                                       <div className="space-y-6">
                                         <div className="space-y-2">
                                           <div className="flex items-start gap-3">
-                                            <span className="text-sm font-bold text-[var(--color-thread-mid-green)] mt-1.5">{String(activeQuestionIndex + 1).padStart(2, '0')} →</span>
+                                            <span className="text-[0.75rem] font-medium tracking-[0.1em] uppercase text-[var(--color-thread-mid-green)] mt-2">{String(activeQuestionIndex + 1).padStart(2, '0')}</span>
                                             <h2 className="font-serif font-normal text-2xl md:text-3xl text-[var(--color-thread-heading)] leading-snug">
                                               {qText}
                                             </h2>
                                           </div>
                                           {qSub && (
-                                            <p className="text-slate-400 text-[0.92rem] ml-8">{qSub}</p>
+                                            <p className="text-[var(--color-thread-gray)] text-[0.92rem] leading-relaxed ml-8">{qSub}</p>
                                           )}
                                         </div>
 
@@ -1213,15 +1221,12 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                                                     key={opt}
                                                     onClick={() => handleSelectOption(q.id, opt, 'choice')}
                                                     className={cn(
-                                                      "w-full p-4 rounded-xl border text-left flex items-center justify-between group transition-all duration-200 cursor-pointer shadow-none",
-                                                      isSelected
-                                                        ? "bg-[var(--color-thread-light-green)] border-[var(--color-thread-mid-green)] text-[var(--color-thread-heading)] font-semibold"
-                                                        : "bg-white border-black/10 text-slate-700 hover:border-black/20 hover:bg-slate-50/50"
+                                                      questionOptionClass(isSelected)
                                                     )}
                                                   >
                                                     <div className="flex items-center gap-3">
                                                       <span className={cn(
-                                                        "w-6 h-6 rounded-md border text-[10px] font-mono font-bold flex items-center justify-center transition-colors",
+                                                        "w-6 h-6 rounded-full border text-[0.66rem] font-medium flex items-center justify-center transition-colors",
                                                         isSelected
                                                           ? "bg-[var(--color-thread-mid-green)] border-[var(--color-thread-mid-green)] text-white"
                                                           : "bg-white border-black/10 text-slate-400 group-hover:border-black/20 group-hover:text-slate-600"
@@ -1249,15 +1254,12 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                                                     key={opt}
                                                     onClick={() => handleSelectOption(q.id, opt, 'multiple-choice')}
                                                     className={cn(
-                                                      "w-full p-4 rounded-xl border text-left flex items-center justify-between group transition-all duration-200 cursor-pointer shadow-none",
-                                                      isSelected
-                                                        ? "bg-[var(--color-thread-light-green)] border-[var(--color-thread-mid-green)] text-[var(--color-thread-heading)] font-semibold"
-                                                        : "bg-white border-black/10 text-slate-700 hover:border-black/20 hover:bg-slate-50/50"
+                                                      questionOptionClass(isSelected)
                                                     )}
                                                   >
                                                     <div className="flex items-center gap-3">
                                                       <span className={cn(
-                                                        "w-6 h-6 rounded-md border text-[10px] font-mono font-bold flex items-center justify-center transition-colors",
+                                                        "w-6 h-6 rounded-full border text-[0.66rem] font-medium flex items-center justify-center transition-colors",
                                                         isSelected
                                                           ? "bg-[var(--color-thread-mid-green)] border-[var(--color-thread-mid-green)] text-white"
                                                           : "bg-white border-black/10 text-slate-400 group-hover:border-black/20 group-hover:text-slate-600"
@@ -1267,7 +1269,7 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                                                       <span className="text-[0.95rem]">{opt}</span>
                                                     </div>
                                                     <div className={cn(
-                                                      "w-5 h-5 rounded-md border flex items-center justify-center transition-all",
+                                                        "w-5 h-5 rounded-full border flex items-center justify-center transition-all",
                                                       isSelected
                                                         ? "bg-[var(--color-thread-mid-green)] border-[var(--color-thread-mid-green)] text-white"
                                                         : "border-black/10 group-hover:border-black/20 bg-white"
@@ -1280,13 +1282,15 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
 
                                               {/* Navigation OK button */}
                                               <div className="pt-4 flex items-center gap-3">
-                                                <button
+                                                <Button
                                                   onClick={handleNextQuestion}
-                                                  className="bg-[var(--color-thread-mid-green)] text-white px-6 py-2.5 rounded-xl font-semibold shadow-none hover:bg-[var(--color-thread-heading)] transition-all flex items-center gap-2 cursor-pointer text-sm"
+                                                  variant="mint"
+                                                  className="px-5 py-2.5 min-h-[40px] shadow-none"
+                                                  rightIcon={<Check className="w-4 h-4" />}
                                                 >
-                                                  OK <Check className="w-4 h-4" />
-                                                </button>
-                                                <span className="text-[10px] font-mono text-slate-400">press Enter ↵</span>
+                                                  OK
+                                                </Button>
+                                                <span className="text-[0.74rem] text-slate-400">press Enter</span>
                                               </div>
                                             </div>
                                           )}
@@ -1299,17 +1303,19 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                                                 onChange={(e) => handleTextChange(q.id, e.target.value)}
                                                 placeholder={q.placeholder || "Type your answer here..."}
                                                 rows={3}
-                                                className="w-full bg-white border border-black/15 rounded-2xl p-4 text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[var(--color-thread-mid-green)]/20 focus:border-[var(--color-thread-mid-green)] transition-all font-sans text-base resize-none"
+                                                className="w-full bg-[var(--color-thread-off-white)]/50 border border-black/10 rounded-tr-[24px] p-4 text-[var(--color-thread-dark-slate)] placeholder:text-[var(--color-thread-placeholder)] focus:outline-none focus:ring-2 focus:ring-[var(--color-thread-mid-green)]/20 focus:border-[var(--color-thread-mid-green)]/30 transition-all font-sans text-[0.95rem] resize-none"
                                               />
                                               {/* Navigation OK button */}
                                               <div className="flex items-center gap-3">
-                                                <button
+                                                <Button
                                                   onClick={handleNextQuestion}
-                                                  className="bg-[var(--color-thread-mid-green)] text-white px-6 py-2.5 rounded-xl font-semibold shadow-none hover:bg-[var(--color-thread-heading)] transition-all flex items-center gap-2 cursor-pointer text-sm"
+                                                  variant="mint"
+                                                  className="px-5 py-2.5 min-h-[40px] shadow-none"
+                                                  rightIcon={<Check className="w-4 h-4" />}
                                                 >
-                                                  OK <Check className="w-4 h-4" />
-                                                </button>
-                                                <span className="text-[10px] font-mono text-slate-400">press Enter ↵ or Ctrl+Enter</span>
+                                                  OK
+                                                </Button>
+                                                <span className="text-[0.74rem] text-slate-400">press Enter or Ctrl+Enter</span>
                                               </div>
                                             </div>
                                           )}
@@ -1329,7 +1335,7 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                                 >
                                   <div>
                                     <h3 className="font-serif font-normal text-2xl text-[var(--color-thread-heading)] mb-1.5">Review your answers</h3>
-                                    <p className="text-slate-500 text-sm">Click on any question to change your answer before saving.</p>
+                                    <p className="text-[var(--color-thread-gray)] text-[0.92rem] leading-relaxed">Click on any question to change your answer before saving.</p>
                                   </div>
 
                                   <div className="space-y-3 max-w-xl border-t border-b border-black/5 py-4 my-2 max-h-[300px] overflow-y-auto pr-1">
@@ -1345,10 +1351,10 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                                             setActiveQuestionIndex(idx);
                                             setIsReviewing(false);
                                           }}
-                                          className="w-full text-left p-3.5 rounded-xl border border-black/5 hover:border-[var(--color-thread-mid-green)] hover:bg-slate-50/50 transition-all flex justify-between items-start gap-4 cursor-pointer group"
+                                          className="w-full text-left p-4 rounded-tr-[20px] border border-black/5 hover:border-[var(--color-thread-mid-green)]/40 hover:bg-[var(--color-thread-off-white)]/50 transition-all flex justify-between items-start gap-4 cursor-pointer group"
                                         >
                                           <div className="space-y-1.5">
-                                            <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider group-hover:text-[var(--color-thread-mid-green)] transition-colors">Question {idx + 1}</div>
+                                            <div className="text-[0.6rem] font-medium text-slate-400 uppercase tracking-[0.12em] group-hover:text-[var(--color-thread-mid-green)] transition-colors">Question {idx + 1}</div>
                                             <div className="text-[0.95rem] font-medium text-slate-800 leading-snug">{q.text.replace(/\$\{childName\}/g, formData.firstName || 'your child')}</div>
                                             <div className="text-sm text-[var(--color-thread-mid-green)] font-semibold bg-[var(--color-thread-light-green)] inline-block px-3 py-1 rounded-lg mt-2">{displayAns}</div>
                                           </div>
@@ -1359,26 +1365,28 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                                   </div>
 
                                   <div className="flex gap-3">
-                                    <button
+                                    <Button
                                       onClick={() => {
                                         saveCurrentChildIntake();
                                         setQSection(null);
                                         setIsReviewing(false);
                                         setIsModalOpen(false);
                                       }}
-                                      className="bg-[var(--color-thread-mid-green)] text-white px-6 py-2.5 rounded-xl font-semibold shadow-none hover:bg-[var(--color-thread-heading)] transition-all flex items-center gap-2 cursor-pointer text-sm"
+                                      variant="mint"
+                                      className="px-5 py-2.5 min-h-[40px] shadow-none"
                                     >
                                       Confirm & Save Section
-                                    </button>
-                                    <button
+                                    </Button>
+                                    <Button
                                       onClick={() => {
                                         setIsReviewing(false);
                                         setActiveQuestionIndex(0);
                                       }}
-                                      className="bg-white border border-black/10 hover:border-black/20 text-slate-600 px-5 py-2.5 rounded-xl font-semibold shadow-none transition-all text-sm cursor-pointer"
+                                      variant="muted"
+                                      className="px-5 py-2.5 min-h-[40px] shadow-none"
                                     >
                                       Back to start
-                                    </button>
+                                    </Button>
                                   </div>
                                 </motion.div>
                               )}
@@ -1389,7 +1397,7 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                           <div className="pt-5 pb-6 px-6 sm:px-10 border-t border-black/5 flex items-center justify-between">
                             {/* Progress bar / index indicator */}
                             <div className="flex items-center gap-4">
-                              <span className="text-xs font-mono font-bold text-slate-400">
+                              <span className="text-[0.78rem] font-medium text-slate-400">
                                 {!isReviewing 
                                   ? `${activeQuestionIndex + 1} of ${(QUESTIONS[qSection || ''] || []).length}`
                                   : 'Review screen'
@@ -1407,13 +1415,13 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
 
                             {/* Up/Down buttons and navigation guides */}
                             <div className="flex items-center gap-2">
-                              <span className="text-[10px] text-slate-400 hidden sm:inline-block font-medium animate-pulse">Use Arrow Keys ↑↓ to navigate</span>
-                              <div className="flex border border-black/10 rounded-xl overflow-hidden bg-white">
+                              <span className="text-[0.74rem] text-slate-400 hidden sm:inline-block font-medium">Use arrow keys to navigate</span>
+                              <div className="flex border border-black/10 rounded-full overflow-hidden bg-white">
                                 <button
                                   onClick={handlePrevQuestion}
                                   disabled={activeQuestionIndex === 0 && !isReviewing}
                                   className={cn(
-                                    "p-2.5 hover:bg-slate-50 transition-all border-r border-black/10 cursor-pointer text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed"
+                                    "p-2.5 hover:bg-[var(--color-thread-off-white)] transition-all border-r border-black/10 cursor-pointer text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed"
                                   )}
                                   title="Previous (Arrow Up)"
                                 >
@@ -1423,7 +1431,7 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                                   onClick={handleNextQuestion}
                                   disabled={isReviewing}
                                   className={cn(
-                                    "p-2.5 hover:bg-slate-50 transition-all cursor-pointer text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed"
+                                    "p-2.5 hover:bg-[var(--color-thread-off-white)] transition-all cursor-pointer text-slate-600 disabled:opacity-40 disabled:cursor-not-allowed"
                                   )}
                                   title="Next (Arrow Down)"
                                 >
@@ -1442,16 +1450,16 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                   {step === 5 && (
                     <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-8">
                       <div>
-                        <span className="text-xs font-bold tracking-[0.1em] uppercase text-[var(--color-thread-mid-green)] mb-3 block">Step 5 of 5 · Helpful documents</span>
-                        <h1 className="font-serif font-normal text-3xl text-[var(--color-thread-heading)] mb-2">Add any helpful documents</h1>
-                        <p className="text-slate-500 text-[0.95rem]">Anything that helps your clinician understand {formData.firstName || 'Maya'} — all optional, and you can add more after your session.</p>
+                        <span className={sectionKickerClass}>Step 5 of 5 · Helpful documents</span>
+                        <h1 className={stepHeadingClass}>Add any helpful documents</h1>
+                        <p className={stepLeadClass}>Anything that helps your clinician understand {formData.firstName || 'your child'} — all optional, and you can add more after your session.</p>
                       </div>
 
                       <div className="space-y-6">
                         <div>
                           <div className="flex justify-between items-baseline mb-3">
                             <Label className="mb-0">Reports & Notes</Label>
-                            <span className="text-xs text-slate-400">optional</span>
+                            <span className="text-[0.78rem] text-slate-400">optional</span>
                           </div>
                           
                           <div 
@@ -1460,10 +1468,10 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                             onDrop={handleDrop}
                             onClick={triggerFileInput}
                             className={cn(
-                              "border-1.5 border-dashed rounded-tr-[24px] p-10 text-center cursor-pointer transition-all group relative",
+                              "rounded-tr-[32px] p-10 text-center cursor-pointer transition-all group relative",
                               isDragging 
-                                ? "border-[var(--color-thread-mid-green)] bg-[var(--color-thread-light-green)]/60" 
-                                : "border-black/10 bg-[var(--color-thread-light-green)]/30 hover:border-[var(--color-thread-mid-green)] hover:bg-[var(--color-thread-light-green)]/50"
+                                ? "bg-[var(--color-thread-light-green)]/60"
+                                : "bg-[var(--color-thread-light-green)]/30 hover:bg-[var(--color-thread-light-green)]/50"
                             )}
                           >
                             <input 
@@ -1475,7 +1483,7 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                               accept=".pdf,.doc,.docx,.xls,.xlsx,.png,.jpg,.jpeg"
                             />
                             <PageIcon variant="white" icon={<Upload className="w-[22px] h-[22px] stroke-[1.7]" />} className="mx-auto" />
-                            <div className="text-[1rem] font-medium tracking-tight text-slate-900">
+                            <div className="text-[1.12rem] font-medium tracking-tight leading-[1.3] text-[var(--color-thread-dark-slate)]">
                               Drag and drop a file here, or click to upload manually
                             </div>
                             <div className="text-[0.82rem] text-slate-500 mt-2">
@@ -1487,12 +1495,12 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                         {/* List of uploaded files */}
                         {uploadedFiles.length > 0 && (
                           <div className="space-y-2">
-                            <span className="text-[10px] font-bold tracking-wider text-slate-400 uppercase block">Uploaded files ({uploadedFiles.length})</span>
+                            <span className={smallFieldLabelClass}>Uploaded files ({uploadedFiles.length})</span>
                             <div className="flex flex-col gap-2">
                               {uploadedFiles.map((file, idx) => (
                                 <div 
                                   key={idx} 
-                                  className="flex items-center justify-between p-3.5 bg-white border border-black/5 rounded-xl hover:shadow-xs transition-shadow"
+                                  className="flex items-center justify-between p-3.5 bg-white border border-black/5 rounded-tr-[18px] hover:shadow-xs transition-shadow"
                                 >
                                   <div className="flex items-center gap-3">
                                     <div className="w-9 h-9 rounded-lg bg-[var(--color-thread-light-green)] text-[var(--color-thread-mid-green)] flex items-center justify-center">
@@ -1542,7 +1550,7 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                           Skip for now
                         </button>
                       )}
-                      <Button onClick={handleNext} variant="forest" className="px-6 shadow-none">
+                      <Button onClick={handleNext} variant={step === 5 ? "forest" : "mint"} className="px-6 shadow-none">
                         {step === 5 ? 'Finish setup' : 'Continue'} <ArrowRight className="w-4 h-4 ml-2" />
                       </Button>
                     </div>
@@ -1559,37 +1567,46 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
               <div className="w-full md:w-3/5 p-8 sm:p-12 md:p-14 flex flex-col justify-between gap-10">
                 <div className="space-y-8">
                   <div>
-                    <span className="text-[0.7rem] font-bold tracking-[0.1em] uppercase text-[var(--color-thread-mid-green)] mb-4 block">Setup complete</span>
-                    <h1 className="font-serif font-normal text-3xl md:text-4xl leading-[1.15] tracking-tight mb-4 text-[var(--color-thread-heading)]">You're all set.</h1>
-                    <p className="text-slate-500 text-[1.05rem] leading-relaxed max-w-[42ch]">{formData.firstName || 'Your child'}'s space is ready and your session is booked. Here's what we have, and what happens next.</p>
+                    <span className={sectionKickerClass}>Setup complete</span>
+                    <h1 className={stepHeadingClass}>You're all set.</h1>
+                    <p className={stepLeadClass}>{formData.firstName || 'Your child'}'s space is ready and your session is booked. Here's what we have, and what happens next.</p>
                   </div>
                   
-                  <div className="bg-[var(--color-thread-off-white)] p-5 rounded-2xl flex flex-col gap-4">
+                  <div className="bg-[var(--color-thread-off-white)]/70 p-5 rounded-tr-[24px] border border-black/5 flex flex-col gap-4">
                     <div className="flex items-center gap-4">
-                      <div className="w-8 h-8 rounded-full bg-[var(--color-thread-heading)] flex items-center justify-center text-white">
+                      <div className="w-8 h-8 rounded-full bg-[var(--color-thread-mid-green)] flex items-center justify-center text-white">
                         <Check className="w-4 h-4" />
                       </div>
                       <div>
-                        <div className="text-xs font-bold tracking-[0.1em] uppercase text-slate-400 mb-0.5">Your child</div>
+                        <div className="text-[0.6rem] font-medium tracking-[0.12em] uppercase text-slate-400 mb-0.5">Your child</div>
                         <div className="font-medium text-slate-900">{formData.firstName || 'Child'} · {formData.dob ? 'Added' : '9 years old'}</div>
                       </div>
                     </div>
                     <div className="flex items-center gap-4 border-t border-black/5 pt-4">
-                      <div className="w-8 h-8 rounded-full bg-[var(--color-thread-heading)] flex items-center justify-center text-white">
+                      <div className="w-8 h-8 rounded-full bg-[var(--color-thread-mid-green)] flex items-center justify-center text-white">
                         <Check className="w-4 h-4" />
                       </div>
                       <div>
-                        <div className="text-xs font-bold tracking-[0.1em] uppercase text-slate-400 mb-0.5">Session booked</div>
+                        <div className="text-[0.6rem] font-medium tracking-[0.12em] uppercase text-slate-400 mb-0.5">Session booked</div>
                         <div className="font-medium text-slate-900">{formData.sessionDay ? `Thu ${formData.sessionDay} Jun, ${formData.sessionTime || '4:00 pm'}` : 'Thu 26 Jun, 4:00 pm'} · Dr. Naomi Clark</div>
                       </div>
                     </div>
                     <div className="flex items-center justify-between gap-4 border-t border-black/5 pt-4">
                       <div className="flex items-center gap-4">
-                        <div className="w-8 h-8 rounded-full border-2 border-amber-500 flex items-center justify-center text-amber-500">
-                          <span className="text-xs font-bold">!</span>
+                        <div className={cn(
+                          "w-8 h-8 rounded-full flex items-center justify-center",
+                          remainingQuestionnaireSections === 0
+                            ? "bg-[var(--color-thread-mid-green)] text-white"
+                            : "border-2 border-amber-500 text-amber-500"
+                        )}>
+                          {remainingQuestionnaireSections === 0 ? (
+                            <Check className="w-4 h-4" />
+                          ) : (
+                            <span className="text-xs font-bold">!</span>
+                          )}
                         </div>
                         <div>
-                          <div className="text-xs font-bold tracking-[0.1em] uppercase text-slate-400 mb-0.5">Questionnaire</div>
+                          <div className="text-[0.6rem] font-medium tracking-[0.12em] uppercase text-slate-400 mb-0.5">Questionnaire</div>
                           <div className="font-medium text-slate-900">
                             {remainingQuestionnaireSections === 0
                               ? 'All sections complete'
@@ -1597,18 +1614,56 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                           </div>
                         </div>
                       </div>
-                      <button 
-                        onClick={() => setStep(4)}
-                        className="text-xs font-semibold text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100/70 px-3 py-1.5 rounded-full transition-all flex items-center gap-1 cursor-pointer"
-                      >
-                        Finish <ArrowRight className="w-3.5 h-3.5" />
-                      </button>
+                      {remainingQuestionnaireSections === 0 ? (
+                        <span className="text-[0.6rem] tracking-[0.1em] uppercase font-medium px-2.75 py-1.5 rounded-full bg-[var(--color-thread-light-green)] text-[var(--color-thread-mid-green)]">
+                          Completed
+                        </span>
+                      ) : (
+                        <button
+                          onClick={() => setStep(4)}
+                          className="text-xs font-semibold text-amber-600 hover:text-amber-700 bg-amber-50 hover:bg-amber-100/70 px-3 py-1.5 rounded-full transition-all flex items-center gap-1 cursor-pointer"
+                        >
+                          Finish <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between gap-4 border-t border-black/5 pt-4">
+                      <div className="flex items-center gap-4">
+                        <div className={cn(
+                          "w-8 h-8 rounded-full flex items-center justify-center",
+                          uploadedFiles.length > 0
+                            ? "bg-[var(--color-thread-mid-green)] text-white"
+                            : "bg-white border border-black/10 text-slate-400"
+                        )}>
+                          {uploadedFiles.length > 0 ? (
+                            <Check className="w-4 h-4" />
+                          ) : (
+                            <Upload className="w-4 h-4" />
+                          )}
+                        </div>
+                        <div>
+                          <div className="text-[0.6rem] font-medium tracking-[0.12em] uppercase text-slate-400 mb-0.5">Documents</div>
+                          <div className="font-medium text-slate-900">
+                            {uploadedFiles.length > 0
+                              ? `${uploadedFiles.length} ${uploadedFiles.length === 1 ? 'file' : 'files'} uploaded`
+                              : 'No documents added yet'}
+                          </div>
+                        </div>
+                      </div>
+                      <span className={cn(
+                        "text-[0.6rem] tracking-[0.1em] uppercase font-medium px-2.75 py-1.5 rounded-full",
+                        uploadedFiles.length > 0
+                          ? "bg-[var(--color-thread-light-green)] text-[var(--color-thread-mid-green)]"
+                          : "bg-[var(--color-thread-off-white)] text-[var(--color-thread-gray)] border border-black/10"
+                      )}>
+                        {uploadedFiles.length > 0 ? "Added" : "Optional"}
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 <div className="pt-6 border-t border-black/5 w-full">
-                  <Button onClick={onComplete} variant="forest" className="px-8 shadow-none w-full sm:w-auto">
+                  <Button onClick={onComplete} variant="mint" className="px-8 shadow-none w-full sm:w-auto">
                     Go to your family home <ArrowRight className="w-4 h-4 ml-2" />
                   </Button>
                 </div>
@@ -1617,7 +1672,7 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
               {/* Right Column: Next steps timeline & setup another child */}
               <div className="w-full md:w-2/5 bg-transparent p-8 sm:p-10 border-t md:border-t-0 md:border-l border-black/5 flex flex-col justify-start space-y-8 overflow-y-auto">
                 <div>
-                  <span className="text-[0.75rem] font-bold tracking-[0.1em] uppercase text-[var(--color-thread-mid-green)] mb-6 block">What happens next</span>
+                  <span className="text-[0.75rem] tracking-[0.1em] uppercase text-[var(--color-thread-mid-green)] font-medium mb-6 block">What happens next</span>
                   <div className="relative before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-black/5">
                     <TimelineStep
                       title="Before your session"
@@ -1643,8 +1698,8 @@ export default function AddChildFlow({ onComplete, onCancel, asModal }: AddChild
                   </div>
                 </div>
 
-                <div className="bg-white p-5 rounded-2xl border border-black/5 shadow-none">
-                  <h4 className="font-semibold text-slate-900 text-sm mb-1">Setting up another child?</h4>
+                <div className="bg-white p-5 rounded-tr-[24px] border border-black/5 shadow-none">
+                  <h4 className="font-medium text-[var(--color-thread-heading)] text-sm mb-1">Setting up another child?</h4>
                   <p className="text-xs text-slate-500 leading-relaxed mb-4">Each child has their own session, assessment and documents.</p>
                   <Button variant="muted" className="w-full text-xs py-2" onClick={() => {
                     setFormData({

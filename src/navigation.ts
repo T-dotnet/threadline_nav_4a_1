@@ -11,6 +11,7 @@ export const assessmentPages: Page[] = [
 export const newChildAllowedPages: Page[] = [
   "home",
   "preview",
+  "what-you-noticed",
   "understanding",
   "resources",
   "settings",

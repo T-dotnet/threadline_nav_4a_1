@@ -17,6 +17,7 @@ import {
   LineChart,
   BookOpen,
   Lock,
+  Search,
 } from "lucide-react";
 import { Child } from "../types";
 import { Avatar } from "./ui/Avatar";
@@ -54,7 +55,7 @@ export default function TopBar({
       onPageChange("home");
     } else if (child.isNew && !isNewChildAllowedPage(currentPage)) {
       onPageChange("home");
-    } else if (!child.isNew && currentPage === "preview") {
+    } else if (!child.isNew && (currentPage === "preview" || currentPage === "what-you-noticed")) {
       onPageChange("home");
     }
     setIsDropdownOpen(false);
@@ -523,6 +524,7 @@ export default function TopBar({
               </span>
               {(currentChild.isNew ? [
                 { id: "home", label: "Home", icon: Home },
+                { id: "what-you-noticed", label: "What you noticed", icon: Search },
                 { id: "understanding", label: "Understanding", icon: Info },
                 { id: "resources", label: "Resources", icon: BookOpen },
                 { id: "settings", label: "App Settings", icon: Settings },

@@ -75,34 +75,25 @@ function answerText(answers: Record<string, unknown>, id: string) {
 
 function buildSectionAnalysis(sectionName: string, answers: Record<string, unknown>, childName: string) {
   if (sectionName === "Home & family") {
-    const livesWith = answerText(answers, "family_live_with");
-    const relationship = answerText(answers, "family_relationship").toLowerCase();
-    const transitions = answerText(answers, "family_transitions").toLowerCase();
     const interests = answerText(answers, "family_interests");
-    return `${childName}'s home context is now anchored: living arrangements, caregiver relationship, recent transitions, and motivating interests are all recorded. The strongest thread is ${interests ? `what keeps ${childName} engaged, including ${interests}` : relationship || "the family support pattern"}, with ${transitions || "recent stressors"} noted for clinical review.`;
+    return `Home context is recorded: who is around ${childName}, recent changes, and ${interests ? `what keeps them engaged, including ${interests}` : "what keeps them engaged"}.`;
   }
 
   if (sectionName === "Daily routines") {
     const bedtime = answerText(answers, "routines_bedtime").toLowerCase();
     const sleep = answerText(answers, "routines_sleep").toLowerCase();
-    const morning = answerText(answers, "routines_morning").toLowerCase();
-    const eating = answerText(answers, "routines_eating").toLowerCase();
-    return `Daily rhythm is now visible: bedtime is marked as ${bedtime}, typical sleep is ${sleep}, mornings ${morning}, and mealtimes are ${eating}. This gives the clinician a first read on where effort builds up across the day.`;
+    return `Daily rhythm is recorded: bedtime is ${bedtime}, sleep is ${sleep}, and the clinician can review where effort builds up.`;
   }
 
   if (sectionName === "At school") {
     const setting = answerText(answers, "school_type").toLowerCase();
     const feeling = answerText(answers, "school_feeling").toLowerCase();
-    const social = answerText(answers, "school_social").toLowerCase();
-    const support = answerText(answers, "school_support").toLowerCase();
-    return `School context is ready to review: ${childName}'s setting is ${setting}, school feeling is ${feeling}, peer interaction is ${social}, and support is currently ${support}. This starts to separate learning context from home routines.`;
+    return `School context is recorded: ${childName}'s setting is ${setting}, with school feeling noted as ${feeling}.`;
   }
 
   const sensory = answerText(answers, "dev_sensory").toLowerCase();
   const communication = answerText(answers, "dev_communication").toLowerCase();
-  const regulation = answerText(answers, "dev_regulation").toLowerCase();
-  const strengths = answerText(answers, "dev_strengths");
-  return `Developmental context is now outlined: sensory notes include ${sensory}, communication is described as ${communication}, and regulation is ${regulation}. Strengths such as ${strengths || "the parent-noted positives"} give the clinician useful starting points.`;
+  return `Developmental context is recorded: sensory notes include ${sensory}, and communication is described as ${communication}.`;
 }
 
 function buildSectionConnectionDescription(sectionName: string, answers: Record<string, unknown>, childName: string) {
@@ -123,10 +114,10 @@ function buildSectionConnectionDescription(sectionName: string, answers: Record<
   }
 
   if (sectionName === "At school") {
-    return `School answers show how home and development appear in a busier setting. Feeling ${schoolFeeling || "about school"}, interacting with peers as ${social || "described by the family"}, and current supports all help the clinician separate environment fit from skill development.`;
+    return `School shows how ${childName} manages a busier setting. Feeling ${schoolFeeling || "about school"} and peer patterns may help explain confidence, support needs, and learning fit.`;
   }
 
-  return `Developmental history gives the intake its deeper pattern. ${childName}'s communication is described as ${communication || "part of the profile"} and regulation as ${regulation || "part of the profile"}, which helps explain why routines, school participation, and family supports may need to be matched carefully.`;
+  return `Developmental history shows the deeper pattern. Communication is ${communication || "part of the profile"}, and regulation is ${regulation || "part of the profile"}, helping explain what support may need to match.`;
 }
 
 export default function UnderstandingPage({
@@ -228,7 +219,7 @@ export default function UnderstandingPage({
                       actionText="Open questionnaire section"
                       onClick={() => setActiveQuestionnaireSection(section.name)}
                       disableHover
-                      className="h-full shadow-premium-light"
+                      className="h-full"
                     />
                   );
                 }
@@ -236,7 +227,7 @@ export default function UnderstandingPage({
                 return (
                   <Card
                     key={section.name}
-                    className={`border border-black/5 shadow-premium-light ${corners[index]} h-full`}
+                    className={`${corners[index]} h-full`}
                   >
                     <CardHeader className="flex flex-row items-start justify-between gap-5 p-7.5 pb-0">
                       <div>
@@ -257,7 +248,7 @@ export default function UnderstandingPage({
                         {section.summary}
                       </p>
 
-                      <div className="border-t border-black/5 pt-4">
+                      <div className="pt-4">
                         <div className="text-[0.74rem] font-semibold uppercase tracking-[0.12em] text-slate-400 mb-2">
                           Locked
                         </div>
